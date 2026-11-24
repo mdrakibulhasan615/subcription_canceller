@@ -1,8 +1,19 @@
 -- T-011 email channel and in-app notifications.
--- 1 claim_due_reminders returns the fields the email needs. 2 email opt-out. 3 read_at for in-app.
+-- Order matters: columns first, then the function that reads them.
+-- 1 email opt-out. 2 read_at for in-app. 3 claim_due_reminders returns the fields the email needs.
 -- 4 one-off reopen of rows that failed before email was set up. 5 cap on pending rows per client.
 
--- 1. A return type cannot change in place, so drop and create again. Same body, new columns.
+-- 1. Email opt-out. In-app reminders stay on.
+alter table public.profiles add column email_reminders boolean not null default true;
+grant update (email_reminders) on public.profiles to authenticated;
+
+-- 2. In-app read state. A client may set read_at only. The status guard trigger is not affected.
+alter table public.reminders add column read_at timestamptz;
+grant update (read_at) on public.reminders to authenticated;
+create index reminders_unread_in_app_idx on public.reminders (user_id)
+  where channel = 'in_app' and status = 'sent' and read_at is null;
+
+-- 3. A return type cannot change in place, so drop and create again. Same body, new columns.
 drop function public.claim_due_reminders(int);
 
 create function public.claim_due_reminders(batch int default 50)
@@ -68,16 +79,6 @@ $$;
 
 revoke execute on function public.claim_due_reminders(int) from public, anon, authenticated;
 grant execute on function public.claim_due_reminders(int) to service_role;
-
--- 2. Email opt-out. In-app reminders stay on.
-alter table public.profiles add column email_reminders boolean not null default true;
-grant update (email_reminders) on public.profiles to authenticated;
-
--- 3. In-app read state. A client may set read_at only. The status guard trigger is not affected.
-alter table public.reminders add column read_at timestamptz;
-grant update (read_at) on public.reminders to authenticated;
-create index reminders_unread_in_app_idx on public.reminders (user_id)
-  where channel = 'in_app' and status = 'sent' and read_at is null;
 
 -- 4. One-off: rows that failed only because email was not set up get a new try.
 -- Safe to run again. It changes 0 rows on a new database.

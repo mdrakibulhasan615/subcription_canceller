@@ -94,8 +94,16 @@ export function toRow(sub: SubFull, today: string): SubRowView {
   };
 }
 
-export const daysLeftText = (n: number | null) =>
-  n === null ? "Not set" : n < 0 ? "Stop date passed" : n === 1 ? "1 day" : `${n} days`;
+export const daysLeftText = (n: number | null, hasStop = true) =>
+  n === null
+    ? "Not set"
+    : n < 0
+      ? hasStop
+        ? "Stop date passed"
+        : "Renewal date passed"
+      : n === 1
+        ? "1 day"
+        : `${n} days`;
 
 export function filterSort(rows: SubRowView[], p: ListParams): SubRowView[] {
   const out = rows.filter(
@@ -118,7 +126,8 @@ export function safeCancelUrl(u: string | null | undefined): string | null {
   const t = u?.trim();
   if (!t) return null;
   try {
-    return new URL(t).protocol === "https:" ? t : null;
+    const p = new URL(t);
+    return p.protocol === "https:" && !p.username && !p.password ? t : null;
   } catch {
     return null;
   }
@@ -139,6 +148,12 @@ export const formatDate = (iso: string | null) =>
         year: "numeric",
       })
     : "Not set";
+
+/** Date part of a timestamp, shown in the user's timezone. Bad timezone: UTC. */
+export function formatStampDate(iso: string, tz: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? iso : formatDate(todayIn(tz, d));
+}
 
 export function formatFireAt(iso: string, tz: string): string {
   if (Number.isNaN(Date.parse(iso))) return iso;

@@ -59,12 +59,15 @@ const db: SenderDb = {
   },
 };
 
-// Without a key and sender address the stub makes email rows fail with "email not configured".
+// Without a key, a sender address and an https APP_URL the stub makes email rows fail with "email not configured".
 const apiKey = Deno.env.get("RESEND_API_KEY");
 const from = Deno.env.get("EMAIL_FROM");
-const transport = apiKey && from ? createResendTransport({ apiKey, from }) : null;
+const appUrl = Deno.env.get("APP_URL") ?? "";
+// Real email only when links will be https. Else the stub, so no mail has broken links.
+const transport =
+  apiKey && from && appUrl.startsWith("https://") ? createResendTransport({ apiKey, from }) : null;
 const tpl = {
-  appUrl: Deno.env.get("APP_URL") ?? "",
+  appUrl,
   brand: Deno.env.get("APP_NAME") ?? "StopDate",
 };
 

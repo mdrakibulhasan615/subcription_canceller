@@ -1,5 +1,6 @@
 import { CircleAlert, Bell } from "lucide-react";
 import { createClient, getClaims } from "../../../lib/supabase/server";
+import { createSubDb, userIdFrom } from "../../../lib/subscriptions";
 import { listNotifications, type Notification } from "../../../lib/notifications";
 import { Button } from "../../../components/ui/button";
 import { markAllRead, markOneRead } from "./actions";
@@ -7,11 +8,20 @@ import { markAllRead, markOneRead } from "./actions";
 export const metadata = { title: "Notifications" };
 
 export default async function NotificationsPage() {
-  await getClaims();
+  const userId = userIdFrom(await getClaims());
   let items: Notification[] = [];
   let failed = false;
   try {
-    items = await listNotifications(await createClient());
+    const sb = await createClient();
+    // A profile error must not hide the notices: fall back to UTC.
+    const tz = userId
+      ? ((
+          await createSubDb(sb)
+            .getProfile(userId)
+            .catch(() => null)
+        )?.timezone ?? "UTC")
+      : "UTC";
+    items = await listNotifications(sb, new Date(), tz);
   } catch {
     failed = true;
   }

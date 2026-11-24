@@ -1,4 +1,4 @@
--- T-011 read_at grant, claim columns, email opt-out column, reopen rule.
+-- T-011 read_at grant, claim columns, email opt-out column, reopen rule (copy of migration step 4).
 begin;
 select * from no_plan();
 
@@ -47,7 +47,9 @@ select results_eq(
   'claim returns subscription, cancel_url, price, currency, timezone and opt-out');
 reset role;
 
--- Reopen rule (same statement as migration step 4).
+-- NOT the migration itself: the migration ran on an empty database, so it changed 0 rows.
+-- This runs a COPY of migration step 4 on test rows. Keep it the same as the migration.
+-- The real one-off is checked by hand on the project (see supabase/README.md).
 insert into public.reminders (id, subscription_id, user_id, type, channel, fire_at, status, attempts, last_error) values
   ('00000000-0000-0000-0000-000000000011', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'stop_date', 'email', now() - interval '2 hours', 'failed', 3, 'email not configured'),
   ('00000000-0000-0000-0000-000000000012', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'stop_date', 'email', now() - interval '3 hours', 'failed', 3, 'resend 500');
@@ -56,9 +58,9 @@ set status = 'pending', attempts = 0, claimed_until = null, last_error = null
 where status in ('failed', 'pending') and last_error = 'email not configured' and fire_at > now() - interval '1 day';
 select results_eq(
   $q$select status, attempts from public.reminders where id = '00000000-0000-0000-0000-000000000011'$q$,
-  $q$values ('pending'::text, 0)$q$, 'recent not-configured failure is reopened');
+  $q$values ('pending'::text, 0)$q$, 'copy of step 4: recent not-configured failure is reopened');
 select is((select status from public.reminders where id = '00000000-0000-0000-0000-000000000012'), 'failed',
-  'other errors stay failed');
+  'copy of step 4: other errors stay failed');
 
 select * from finish();
 rollback;

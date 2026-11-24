@@ -109,6 +109,8 @@ describe("toRow", () => {
     const past = toRow(sub({ stop_date: "2026-11-01" }), TODAY);
     expect(past.status).toBe("stopping_soon");
     expect(daysLeftText(past.daysLeft)).toBe("Stop date passed");
+    const renewOnly = toRow(sub({ stop_date: null, next_renewal_date: "2026-11-01" }), TODAY);
+    expect(daysLeftText(renewOnly.daysLeft, false)).toBe("Renewal date passed");
   });
   it("does not crash on a bad interval", () => {
     expect(toRow(sub({ billing_interval: 0 }), TODAY).monthlyText).toBe("Not available");
@@ -148,7 +150,15 @@ describe("filterSort", () => {
 describe("safeCancelUrl", () => {
   it("allows only https", () => {
     expect(safeCancelUrl(" https://x.com/c ")).toBe("https://x.com/c");
-    for (const u of ["http://x.com", "javascript:alert(1)", "not a url", "", null]) {
+    for (const u of [
+      "https://user:pw@x.com",
+      "https://x.com@evil.com/",
+      "http://x.com",
+      "javascript:alert(1)",
+      "not a url",
+      "",
+      null,
+    ]) {
       expect(safeCancelUrl(u)).toBeNull();
     }
   });

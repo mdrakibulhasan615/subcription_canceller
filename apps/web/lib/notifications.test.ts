@@ -34,11 +34,34 @@ describe("notificationText", () => {
   it("uses the key date by type and never says cancelled", () => {
     expect(notificationText("stop_date", sub, NOW)).toContain("Payments stop on 12 Dec 2026.");
     expect(notificationText("renewal", sub, NOW)).toContain("15 Dec 2026");
-    expect(notificationText("trial_end", sub, NOW)).toContain("Payments stop soon.");
+    expect(notificationText("trial_end", sub, NOW)).toContain("Check this subscription.");
+    const trial = notificationText("trial_end", { ...sub, trial_end_date: "2026-12-10" }, NOW);
+    expect(trial).toContain("The free trial ends on 10 Dec 2026. Payments can start on that date.");
+    const ren = notificationText("renewal", sub, NOW);
+    expect(ren).toContain("Netflix renews on 15 Dec 2026. To stop payments, freeze or close");
+    for (const x of [ren, trial]) {
+      expect(x.toLowerCase()).not.toContain("payments stop on");
+      expect(x).toContain("Blocking a card does not cancel the subscription.");
+    }
     expect(notificationText("stop_date", sub, NOW).toLowerCase()).not.toContain("cancelled");
     expect(notificationText("stop_date", { ...sub, stop_date: "2026-11-01" }, NOW)).toContain(
       "The date was 1 Nov 2026.",
     );
+  });
+});
+
+describe("notificationText timezone", () => {
+  it("uses the user's today, not UTC", () => {
+    // 2026-11-24 20:00 UTC is 25 Nov in Kuala Lumpur: the 24 Nov date has passed there.
+    const late = new Date("2026-11-24T20:00:00Z");
+    const s = { ...sub, stop_date: "2026-11-24" };
+    expect(notificationText("stop_date", s, late, "UTC")).toContain(
+      "Payments stop on 24 Nov 2026.",
+    );
+    expect(notificationText("stop_date", s, late, "Asia/Kuala_Lumpur")).toContain(
+      "The date was 24 Nov 2026.",
+    );
+    expect(notificationText("stop_date", s, late, "Bad/Zone")).toContain("Payments stop on");
   });
 });
 

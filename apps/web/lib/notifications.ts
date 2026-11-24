@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { todayIn } from "./subscriptions";
 
 export interface NotificationSub {
   name: string;
@@ -22,8 +23,13 @@ const formatDate = (iso: string) => {
 /** Badge text for the nav. Over 9 shows "9+". */
 export const formatBadge = (n: number) => (n > 9 ? "9+" : String(n));
 
-/** Same sentences as the email, shorter. The date is the one the reminder is about. */
-export function notificationText(type: string, sub: NotificationSub, now: Date): string {
+/** Same sentences as the email, shorter. The date is the one the reminder is about. "Today" is in the user timezone. */
+export function notificationText(
+  type: string,
+  sub: NotificationSub,
+  now: Date,
+  tz = "UTC",
+): string {
   const key =
     type === "stop_date"
       ? sub.stop_date
@@ -32,11 +38,16 @@ export function notificationText(type: string, sub: NotificationSub, now: Date):
         : type === "trial_end"
           ? sub.trial_end_date
           : null;
+  const d = key ? formatDate(key) : "";
   const lead = !key
-    ? "Payments stop soon."
-    : key < now.toISOString().slice(0, 10)
-      ? `The date was ${formatDate(key)}.`
-      : `Payments stop on ${formatDate(key)}.`;
+    ? "Check this subscription."
+    : key < todayIn(tz, now)
+      ? `The date was ${d}.`
+      : type === "renewal"
+        ? `${sub.name} renews on ${d}. To stop payments, freeze or close your card a few days before this date.`
+        : type === "trial_end"
+          ? `The free trial ends on ${d}. Payments can start on that date.`
+          : `Payments stop on ${d}.`;
   return `${sub.name}: ${lead} Freeze or close your card a few days before the renewal date. Blocking a card does not cancel the subscription.`;
 }
 
@@ -52,6 +63,7 @@ interface Row {
 export async function listNotifications(
   sb: SupabaseClient,
   now = new Date(),
+  tz = "UTC",
 ): Promise<Notification[]> {
   const { data, error } = await sb
     .from("reminders")
@@ -69,7 +81,7 @@ export async function listNotifications(
     return [
       {
         id: r.id,
-        text: notificationText(r.type, sub, now),
+        text: notificationText(r.type, sub, now, tz),
         fireAt: r.fire_at,
         unread: r.read_at === null,
       },

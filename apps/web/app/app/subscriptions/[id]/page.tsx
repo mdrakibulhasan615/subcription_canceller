@@ -6,6 +6,7 @@ import {
   daysLeftText,
   formatDate,
   formatFireAt,
+  formatStampDate,
   loadDetail,
   safeCancelUrl,
 } from "../../../../lib/sub-view";
@@ -40,9 +41,12 @@ export default async function SubscriptionDetailPage({
   if (v === "not_found") notFound();
   if (v === "error") {
     return (
-      <p role="alert" className="text-destructive">
-        This subscription could not be loaded. Reload the page to try again.
-      </p>
+      <>
+        <h1 className="text-[32px] leading-[38px] md:text-5xl md:leading-[52px]">Subscription</h1>
+        <p role="alert" className="mt-4 text-destructive">
+          This subscription could not be loaded. Reload the page to try again.
+        </p>
+      </>
     );
   }
   const { sub, row, tz, reminders, guide } = v;
@@ -74,7 +78,7 @@ export default async function SubscriptionDetailPage({
           </div>
           <div>
             <dt className="inline text-muted-foreground">Days left: </dt>
-            <dd className="inline">{daysLeftText(row.daysLeft)}</dd>
+            <dd className="inline">{daysLeftText(row.daysLeft, !!sub.stop_date)}</dd>
           </div>
           {sub.is_trial && (
             <div>
@@ -128,7 +132,7 @@ export default async function SubscriptionDetailPage({
         {/* T-012: wire the mark/unmark action here */}
         <p className="mt-1">
           {sub.merchant_cancelled_at
-            ? `Marked as cancelled with merchant on ${formatDate(sub.merchant_cancelled_at.slice(0, 10))}`
+            ? `Marked as cancelled with merchant on ${formatStampDate(sub.merchant_cancelled_at, tz)}`
             : "Not marked yet"}
         </p>
       </section>

@@ -37,10 +37,32 @@ function formatPrice(minor: number, currency: string): string {
   }
 }
 
-/** Only http and https links. Anything else (javascript:, empty) gives null. */
+/** Only http and https links without user:pass@. Anything else (javascript:, empty) gives null. */
 export function safeCancelUrl(url: string | null): string | null {
   const u = (url ?? "").trim();
-  return /^https?:\/\//i.test(u) ? u : null;
+  try {
+    const p = new URL(u);
+    const ok = (p.protocol === "https:" || p.protocol === "http:") && !p.username && !p.password;
+    return ok ? u : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Subject and lead sentence by reminder type. A renewal or trial end is not a stop date. */
+function copy(type: string, name: string, date: string | null) {
+  if (!date) return { subject: `${name}: check this subscription`, lead: "Check this subscription." };
+  if (type === "renewal")
+    return {
+      subject: `${name}: renews on ${date}`,
+      lead: `${name} renews on ${date}. To stop payments, freeze or close your card a few days before this date.`,
+    };
+  if (type === "trial_end")
+    return {
+      subject: `${name}: free trial ends on ${date}`,
+      lead: `The free trial ends on ${date}. Payments can start on that date.`,
+    };
+  return { subject: `${name}: payments stop on ${date}`, lead: `Payments stop on ${date}.` };
 }
 
 const oneLine = (s: string) => s.replace(/[\r\n]+/g, " ").trim();
@@ -50,7 +72,7 @@ export function renderReminderEmail(r: ClaimedReminder, o: TemplateOpts): Email 
   const name = oneLine(r.subName);
   const key = keyDate(r);
   const date = key ? formatDate(key) : null;
-  const stop = date ? `Payments stop on ${date}.` : "Payments stop soon.";
+  const { subject, lead: stop } = copy(r.type, name, date);
   const price = r.priceMinor >= 0 ? `Price: ${formatPrice(r.priceMinor, r.currency)}.` : null;
   const freeze = "Freeze or close your card a few days before the renewal date, not on it.";
   const block = `Blocking a card does not cancel the subscription. Cancel with ${name} too.`;
@@ -58,8 +80,6 @@ export function renderReminderEmail(r: ClaimedReminder, o: TemplateOpts): Email 
   const app = `${base(o.appUrl)}/app/subscriptions`;
   const settings = `${base(o.appUrl)}/app/settings`;
   const why = `You got this email because you set reminders in ${o.brand}.`;
-
-  const subject = `${name}: ${date ? `payments stop on ${date}` : "payments stop soon"}`;
 
   const text = [
     name,

@@ -61,9 +61,24 @@ describe("renderReminderEmail", () => {
     expect(e.html).toContain("&lt;script&gt;");
   });
 
-  it("uses the key date by type", () => {
-    const e = renderReminderEmail(row({ type: "renewal" }), o);
-    expect(e.subject).toContain("15 Dec 2026");
+  it("uses the key date and own wording by type", () => {
+    const r = renderReminderEmail(row({ type: "renewal" }), o);
+    expect(r.subject).toBe("Netflix: renews on 15 Dec 2026");
+    expect(r.text).toContain("Netflix renews on 15 Dec 2026. To stop payments, freeze or close your card");
+    const t = renderReminderEmail(row({ type: "trial_end", trialEndDate: "2026-12-10" }), o);
+    expect(t.subject).toBe("Netflix: free trial ends on 10 Dec 2026");
+    expect(t.text).toContain("The free trial ends on 10 Dec 2026. Payments can start on that date.");
+    for (const e of [r, t]) {
+      expect((e.subject + e.text + e.html).toLowerCase()).not.toContain("payments stop");
+      expect(e.text).toContain("Blocking a card does not cancel the subscription");
+    }
+    const n = renderReminderEmail(row({ type: "trial_end", trialEndDate: null }), o);
+    expect(n.text).toContain("Check this subscription.");
+  });
+
+  it("drops a cancel link with user:pass@", () => {
+    const e = renderReminderEmail(row({ cancelUrl: "https://netflix.com@evil.com/x" }), o);
+    expect(e.text).not.toContain("evil.com");
   });
 });
 

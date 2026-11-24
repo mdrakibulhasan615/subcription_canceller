@@ -16,10 +16,10 @@ If a Vault entry is missing, the cron call fails with no error. Delivery is at-l
 
 ## Safety sweep (T-010) one-time setup
 
-A GitHub Actions workflow runs `pnpm sweep` daily at 02:00 UTC. It fixes missing reminder rows and checks the sender. A failed run means a critical finding. GitHub emails the repo owner.
+A GitHub Actions workflow runs `pnpm sweep` daily at 02:00 UTC. It fixes missing reminder rows and checks the sender. A failed run means a critical finding. GitHub emails the repo owner about a failed run. The sweep does not send the founder email yet (stub).
 
 1. In GitHub, add repository secrets: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `FOUNDER_ALERT_EMAIL`.
-2. `FOUNDER_ALERT_EMAIL` is the address the sweep emails when it finds a critical problem.
+2. `FOUNDER_ALERT_EMAIL` is the address for the founder alert. The sweep does not use it yet.
 3. Test it: run the workflow by hand (workflow_dispatch) and read the log.
 
 ## Email and in-app reminders (T-011) go-live checklist
