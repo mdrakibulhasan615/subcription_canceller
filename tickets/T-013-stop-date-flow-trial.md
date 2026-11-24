@@ -1,7 +1,7 @@
 ﻿---
 id: T-013
 title: Stop-date flow and free-trial mode
-status: PLANNING
+status: TESTING
 milestone: MVP
 ui: true
 depends_on: [T-012]
@@ -51,6 +51,7 @@ Reviewer: skip (no DB change).
 
 ## Design (Designer)
 ## Build notes (Builder)
+Built. 336 tests, build ok. Core: trial with a valid stop-date anchor gets only stop_date reminders (new test 14b); trial without stop date still gets trial_end. Files: lib/stop-flow.ts (+test; STOP_METHODS lives here, not stop-flow/methods.ts), subscriptions.ts (SubPatch.payment_method_type), app/app/subscriptions/{actions.ts (new save -> stop-flow), new/page.tsx (?trial=1 + toggle link), sub-form.tsx (trialMode), [id]/page.tsx (flow link + passed card), [id]/stop-flow/{page,actions,error-summary}}. Errors travel as closed ?err= codes mapped to fixed text. Unverified: browser/JS-off/focus/dark mode, server-action redirects live, column grant, pgTAP. Step 3 says "These reminders are set" even if an earlier rebuild failed (already shown on the form). loadGuide fetches all guides per load.
 ## Test report (Tester)
 ## Review verdict (Reviewer)
 <!-- VERDICT: PASS | NEEDS_FIXES -->

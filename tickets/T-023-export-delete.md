@@ -1,7 +1,7 @@
 ﻿---
 id: T-023
 title: Data export and account delete
-status: PLANNING
+status: BUILDING
 milestone: MVP
 ui: true
 depends_on: [T-004]

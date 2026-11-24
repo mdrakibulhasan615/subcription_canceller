@@ -1,7 +1,7 @@
 ﻿---
 id: T-015
 title: Wise provider guide and Apple/Google store guides
-status: BACKLOG
+status: BUILDING
 milestone: MVP
 ui: true
 depends_on: [T-014]

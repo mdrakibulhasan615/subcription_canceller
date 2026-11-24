@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient, getClaims } from "../../../../lib/supabase/server";
+import { stopPassed } from "../../../../lib/stop-flow";
 import { createSubDb, userIdFrom } from "../../../../lib/subscriptions";
 import {
   daysLeftText,
@@ -110,6 +111,19 @@ export default async function SubscriptionDetailPage({
       {!sub.archived_at && (
         <section className="mt-8">
           <h2 className={h2}>Stop date actions</h2>
+          {stopPassed(sub, v.today) && (
+            <div className="mt-2 max-w-prose rounded-lg border border-notice-border bg-notice-bg p-4 text-notice-fg">
+              <p className="font-medium">
+                Your stop date has passed. Did you freeze or close the card?
+              </p>
+              <p className="text-sm">
+                Use the buttons below to mark it as stopped or move the date.
+              </p>
+            </div>
+          )}
+          <Link href={`/app/subscriptions/${sub.id}/stop-flow`} className={link}>
+            Open stop-date flow
+          </Link>
           <ReminderActions
             id={sub.id}
             stoppedText={

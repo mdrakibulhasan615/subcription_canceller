@@ -43,6 +43,7 @@ describe("routeDecision", () => {
       "/",
       "/privacy",
       "/terms",
+      "/goodbye",
       "/sign-in",
       "/auth/callback",
       "/api/waitlist",

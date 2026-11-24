@@ -20,6 +20,9 @@ export const PRIVACY: LegalSection[] = [
       "Profile settings: time zone, reminder hour, default stop days, currency, and the email reminders switch.",
       "Subscriptions: name, price, currency, billing cycle, dates, cancel link, notes, and a card nickname.",
       "Reminders and in-app notifications for your subscriptions.",
+      "Usage events (events table): what you did in the app, with your user id and a few details. When you delete your account, we remove the user id. The rows stay, with no link to you.",
+      "Feedback (feedback table): your answers to our questions, such as card interest. They are linked to your account. We delete them with your account.",
+      "Change log (audit_log table): before and after copies of changes. They can hold subscription data. When you delete your account, we remove the user id. The rows stay, with no link to you.",
       "Waitlist: the email address you give us, where you joined, and the date. A waitlist email has no account.",
       "Problem reports on guides: the message text only. We do not store your IP address. We do not link a report to your account.",
     ],
@@ -34,7 +37,7 @@ export const PRIVACY: LegalSection[] = [
     heading: "Cookies and analytics",
     paragraphs: [
       "We use one kind of cookie: the sign-in session cookie. We use no ad cookies and no ad trackers.",
-      "For analytics we use Umami. Umami uses no cookies and no ad trackers.",
+      "Analytics are planned and will stay limited. They will use no cookies and no ad trackers. We will update this page when analytics go live.",
     ],
   },
   {
@@ -51,7 +54,6 @@ export const PRIVACY: LegalSection[] = [
       "Vercel: hosting.",
       "Resend: reminder and sign-in emails.",
       "Sentry: error reports. We remove personal data from them before we send them. Sentry is a US service, so error reports leave your country (cross-border transfer).",
-      "Umami: analytics without cookies.",
       "Google: only if you sign in with Google.",
     ],
   },
@@ -64,7 +66,7 @@ export const PRIVACY: LegalSection[] = [
   {
     heading: "Export and delete",
     paragraphs: [
-      "You can download your data as JSON and as CSV. You can delete your account at any time. We delete your data at once. Backups may keep data for up to 30 days. If you joined our waitlist with the same email, we delete that row too.",
+      "You can download your data as JSON and as CSV. You can delete your account at any time. We delete your data at once. Our hosting provider may keep backups for a short time under its own rules. If you joined our waitlist with the same email, we delete that row too.",
       "Some copies stay outside our database for a short time: error reports (Sentry) and email logs (Resend) follow their own rules.",
     ],
   },
@@ -78,7 +80,7 @@ export const TERMS: LegalSection[] = [
   {
     heading: "What the service does",
     paragraphs: [
-      "The service reminds you to freeze or close your card before a subscription renews. Payments stop on the date you set, if you act on the reminder.",
+      "The service reminds you to freeze or close your card before a subscription renews. You can stop payments by acting on the reminder.",
     ],
   },
   {

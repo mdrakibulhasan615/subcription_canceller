@@ -80,6 +80,7 @@ export interface SubPatch {
   stop_confirmed_at?: string | null;
   merchant_cancelled_at?: string | null;
   stop_date?: string;
+  payment_method_type?: string;
 }
 
 type ErrorCode = "server" | "not_found" | "rebuild_failed";

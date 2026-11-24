@@ -76,7 +76,9 @@ export function SubForm({
   isNew,
   defaultStopDays,
   today,
+  trialMode = false,
 }: {
+  trialMode?: boolean;
   action: Action;
   initial: SubFormValues;
   isNew: boolean;
@@ -98,6 +100,14 @@ export function SubForm({
   if (looksLikeCardNumber(v.card_nickname)) cardErrors.card_nickname = CARD_MESSAGE;
   if (looksLikeCardNumber(v.notes)) cardErrors.notes = CARD_MESSAGE;
   const fieldErrors: FieldErrors = { ...err?.fieldErrors, ...cardErrors };
+  const labels: Record<SubField, string> = trialMode
+    ? { ...FIELD_LABELS, price: "Price after the trial", trial_end_date: "Trial ends on" }
+    : FIELD_LABELS;
+  if (trialMode && fieldErrors.next_renewal_date) {
+    // The renewal input is hidden here: show its error on the trial end date.
+    fieldErrors.trial_end_date ??= fieldErrors.next_renewal_date;
+    delete fieldErrors.next_renewal_date;
+  }
   const errorFields = SUB_FIELDS.filter((f) => fieldErrors[f]);
   const showSummary = !!err && (err.message !== null || errorFields.length >= 2);
   const savedId = err?.savedId ?? "";
@@ -125,6 +135,8 @@ export function SubForm({
     setV((p) => ({
       ...p,
       next_renewal_date: r,
+      // Trial: the first payment is the trial end date.
+      ...(trialMode ? { trial_end_date: r } : {}),
       // Only on a new form, and only until the user types their own stop date.
       ...(isNew && !stopTouched.current && isIsoDate(r)
         ? { stop_date: defaultStopDate(r, defaultStopDays) }
@@ -160,7 +172,7 @@ export function SubForm({
                 {errorFields.map((f) => (
                   <li key={f}>
                     <a href={`#${f}`} className="underline">
-                      {FIELD_LABELS[f]}
+                      {labels[f]}
                     </a>
                     : {fieldErrors[f]}
                   </li>
@@ -177,6 +189,7 @@ export function SubForm({
 
       <Field
         name="price"
+        label={labels.price}
         error={fieldErrors.price}
         live
         help={cost ? `About ${cost.monthly} / month, ${cost.yearly} / year` : ""}
@@ -243,17 +256,21 @@ export function SubForm({
         </Field>
       )}
 
-      <Field name="next_renewal_date" error={fieldErrors.next_renewal_date}>
-        {(a) => (
-          <Input
-            name="next_renewal_date"
-            type="date"
-            value={v.next_renewal_date}
-            onChange={onRenewal}
-            {...a}
-          />
-        )}
-      </Field>
+      {trialMode ? (
+        <input type="hidden" name="next_renewal_date" value={v.next_renewal_date} />
+      ) : (
+        <Field name="next_renewal_date" error={fieldErrors.next_renewal_date}>
+          {(a) => (
+            <Input
+              name="next_renewal_date"
+              type="date"
+              value={v.next_renewal_date}
+              onChange={onRenewal}
+              {...a}
+            />
+          )}
+        </Field>
+      )}
 
       <Field
         name="stop_date"
@@ -350,28 +367,39 @@ export function SubForm({
         )}
       </Field>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="is_trial" className="flex min-h-11 items-center gap-3 text-sm font-medium">
-          <input
-            id="is_trial"
-            name="is_trial"
-            type="checkbox"
-            checked={v.is_trial}
-            onChange={(e) => setV((p) => ({ ...p, is_trial: e.target.checked }))}
-            className="size-5"
-          />
-          {FIELD_LABELS.is_trial}
-        </label>
-      </div>
+      {trialMode ? (
+        <input type="hidden" name="is_trial" value="on" />
+      ) : (
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="is_trial"
+            className="flex min-h-11 items-center gap-3 text-sm font-medium"
+          >
+            <input
+              id="is_trial"
+              name="is_trial"
+              type="checkbox"
+              checked={v.is_trial}
+              onChange={(e) => setV((p) => ({ ...p, is_trial: e.target.checked }))}
+              className="size-5"
+            />
+            {FIELD_LABELS.is_trial}
+          </label>
+        </div>
+      )}
 
       {v.is_trial && (
-        <Field name="trial_end_date" error={fieldErrors.trial_end_date}>
+        <Field
+          name="trial_end_date"
+          label={labels.trial_end_date}
+          error={fieldErrors.trial_end_date}
+        >
           {(a) => (
             <Input
               name="trial_end_date"
               type="date"
               value={v.trial_end_date}
-              onChange={set("trial_end_date")}
+              onChange={trialMode ? onRenewal : set("trial_end_date")}
               {...a}
             />
           )}

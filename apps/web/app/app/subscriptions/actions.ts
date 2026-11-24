@@ -49,7 +49,8 @@ export async function saveSub(
     result = { ok: false, error: "server" };
   }
   revalidatePath(LIST);
-  if (result.ok) redirect(LIST); // outside try/catch: redirect works by throwing
+  // Outside try/catch: redirect works by throwing. A new save starts the stop-date flow.
+  if (result.ok) redirect(id === null ? `${LIST}/${result.id}/stop-flow` : LIST);
   return toState(result, target ?? undefined);
 }
 

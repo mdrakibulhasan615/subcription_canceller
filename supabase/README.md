@@ -37,3 +37,7 @@ Do these in order. Do step 4 last.
 9. Check that `verify_jwt` is off for the function.
 
 Migration 000007 reopens rows that failed with "email not configured" in the last day. Check it by hand on the real project: those rows must be `pending` with 0 attempts.
+
+## Account delete (T-023) service role key
+
+Account delete needs `SUPABASE_SERVICE_ROLE_KEY`. In Vercel: Project Settings > Environment Variables, add `SUPABASE_SERVICE_ROLE_KEY` (Production, Sensitive). Never use a `NEXT_PUBLIC_` name. `SUPABASE_URL` is optional: the app reuses `NEXT_PUBLIC_SUPABASE_URL`. For local work, put the key in `apps/web/.env.local` (git-ignored by `.env.*`). Without the key, delete fails with a server error and removes nothing.

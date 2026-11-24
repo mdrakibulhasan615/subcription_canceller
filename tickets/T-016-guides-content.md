@@ -1,7 +1,7 @@
 ﻿---
 id: T-016
 title: Draft 10 guides content; developer verifies
-status: BACKLOG
+status: BUILDING
 milestone: MVP
 ui: false
 depends_on: [T-014]

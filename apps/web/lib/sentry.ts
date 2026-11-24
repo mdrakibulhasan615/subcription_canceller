@@ -1,24 +1,36 @@
 import type { Breadcrumb, ErrorEvent } from "@sentry/nextjs";
 
 const EMAIL_RE = /[^\s@<>()[\]",;:]+@[^\s@<>()[\]",;:]+\.[^\s@<>()[\]",;:]+/g;
-const NUMBER_RE = /\d(?:[ -]?\d){12,18}/g;
+const NUMBER_RE = /\d(?:[ .-]{0,2}\d){12,18}/g;
 
 export function scrubString(s: string): string {
-  return s.replace(EMAIL_RE, "[email]").replace(NUMBER_RE, "[number]");
+  // NFKC turns full-width digits and "@" into ASCII before matching.
+  return s.normalize("NFKC").replace(EMAIL_RE, "[email]").replace(NUMBER_RE, "[number]");
 }
 
 function scrubValue(v: unknown, depth = 0): unknown {
   if (typeof v === "string") return scrubString(v);
-  if (depth > 5 || v === null || typeof v !== "object") return v;
+  if (depth > 5) return "[deep]";
+  if (v === null || typeof v !== "object") return v;
   if (Array.isArray(v)) return v.map((x) => scrubValue(x, depth + 1));
   return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, scrubValue(x, depth + 1)]));
 }
 
 function pathOnly(url: string): string {
+  let p: string;
   try {
-    return new URL(url, "http://x").pathname;
+    p = new URL(url, "http://x").pathname;
   } catch {
-    return url.split(/[?#]/)[0] ?? "";
+    p = url.split(/[?#]/)[0] ?? "";
+  }
+  return scrubString(decodeURIComponent_(p));
+}
+
+function decodeURIComponent_(p: string): string {
+  try {
+    return decodeURIComponent(p);
+  } catch {
+    return p;
   }
 }
 
@@ -33,6 +45,10 @@ export function scrubEvent<T extends ErrorEvent>(event: T): T | null {
       if (event.request.url) event.request.url = pathOnly(event.request.url);
     }
     delete event.user;
+    if (event.transaction) event.transaction = scrubString(event.transaction);
+    for (const k of ["extra", "contexts", "tags"] as const) {
+      if (event[k]) event[k] = scrubValue(event[k]) as never;
+    }
     if (event.message) event.message = scrubString(event.message);
     for (const ex of event.exception?.values ?? []) {
       if (ex.value) ex.value = scrubString(ex.value);

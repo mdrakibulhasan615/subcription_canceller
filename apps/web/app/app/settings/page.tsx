@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DEFAULT_REMINDER_DAYS } from "@app/core";
 import { createClient, getClaims } from "../../../lib/supabase/server";
 import { createDb } from "../../../lib/profile-settings";
@@ -41,6 +42,11 @@ export default async function SettingsPage() {
           Your settings could not be loaded. Reload the page to try again.
         </p>
       )}
+      <p className="mt-8">
+        <Link href="/app/settings/data" className="inline-flex min-h-11 items-center underline">
+          Your data
+        </Link>
+      </p>
     </>
   );
 }

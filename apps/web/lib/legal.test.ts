@@ -25,7 +25,10 @@ describe("legal text", () => {
       "never ask for card numbers",
       "waitlist",
       "do not store your IP",
-      "Umami",
+      "events table",
+      "feedback table",
+      "audit_log table",
+      "no cookies and no ad trackers",
       "Supabase",
       "Vercel",
       "Resend",
@@ -35,7 +38,7 @@ describe("legal text", () => {
       "sign-in session cookie",
       "JSON and as CSV",
       "at once",
-      "30 days",
+      "backups for a short time",
       "do not link to your bank",
     ]) {
       expect(t, k).toContain(k);
@@ -63,6 +66,7 @@ describe("legal text", () => {
       expect(t).not.toContain("subscription cancelled");
       expect(t).not.toContain("cancelled");
       expect(t).not.toContain("guarantee");
+      expect(t).not.toContain("payments stop on the date you set");
     }
   });
 });

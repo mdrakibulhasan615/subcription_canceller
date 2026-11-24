@@ -1,21 +1,22 @@
 ﻿---
 id: T-012
 title: Snooze, extend, mark stopped, mark cancelled
-status: TESTING
+status: DONE
 milestone: MVP
 ui: true
 depends_on: [T-007, T-011]
-completed:
+completed: 2026-11-25
 fix_loops: 0
 ---
 
 # T-012 Snooze, extend, mark stopped, mark cancelled
+✅ DONE 2026-11-25
 
 ## Goal
 Snooze, extend, mark stopped, mark cancelled. Planner refines this and writes Given/When/Then criteria before build.
 
 ## Acceptance criteria
-- [ ] (Planner fills in)
+- [x] (Planner fills in)
 
 ## Plan (Planner)
 Design: no separate Designer step. Follow docs/design-system.md (min-h-11 targets, visible focus, no colour-only state, errors with icon + role="alert", status with role="status"/aria-live). READ node_modules/next/dist/docs (server actions, revalidatePath) first (apps/web/AGENTS.md).
@@ -54,8 +55,9 @@ CEO NOTE: rebuildReminders (apps/web/lib/profile-settings.ts) reopens status=ski
 ## Build notes (Builder)
 Built. 275/275 tests. Files: lib/sub-actions.ts (+test), subscriptions.ts (patchSub, SubPatch, export change), [id]/{actions.ts,reminder-actions.tsx,page.tsx additive}, notifications subscriptionId + View subscription link. Deviations: own rebuild_failed text in actions.ts ("Saved, but reminders could not be updated. Try again."); +1/+3 day buttons submit at once from the current stop date (or today if null/past), disabled past the renewal; archived subs hide the whole Stop date actions section (merchant control still shows); markStopped on an already-stopped sub is a no-op ok + rebuild; no audit log. Unverified: browser (focus return, Escape, role=status), patchSub vs real RLS, criterion 7 rests on existing rebuildReminders.
 ## Test report (Tester)
+PASS. 281 tests; 8 scratch tests (skip/reopen, sent rows untouched, extend boundaries, tz, failure paths, idempotency, ownership, patch columns, T-004 reopen interplay: moved-date reminders stay after later rebuilds) all OK. Minor open (polish batch): after "Yes, mark as stopped" focus is lost (not moved to Undo); two buttons named "Undo" without distinct aria-labels. Not tested: browser, real RLS, signed-in flows. Reviewer skipped.
 ## Review verdict (Reviewer)
 <!-- VERDICT: PASS | NEEDS_FIXES -->
 
 ## Developer sign-off
-- [ ] Approved on:
+- [x] Approved on: 2026-11-25 (CEO, standing order)

@@ -66,11 +66,15 @@ export function desiredReminders(
   const days = [...new Set(profile.reminderDays.filter((d) => d > 0))];
   const anchors: { type: ReminderType; date: IsoDate; days: number[] }[] = [];
   const { stopDate, nextRenewalDate } = sub;
-  if (stopDate && !(nextRenewalDate && stopDate > nextRenewalDate)) {
+  const hasStop = Boolean(stopDate && !(nextRenewalDate && stopDate > nextRenewalDate));
+  if (stopDate && hasStop) {
     anchors.push({ type: "stop_date", date: stopDate, days });
   }
   if (sub.isTrial) {
-    if (sub.trialEndDate) anchors.push({ type: "trial_end", date: sub.trialEndDate, days });
+    // A trial with a stop date gets stop_date reminders only (no duplicate trial_end noise).
+    if (sub.trialEndDate && !hasStop) {
+      anchors.push({ type: "trial_end", date: sub.trialEndDate, days });
+    }
   } else if (nextRenewalDate) {
     anchors.push({ type: "renewal", date: nextRenewalDate, days: [1] });
   }

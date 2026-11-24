@@ -111,6 +111,20 @@ describe("desiredReminders", () => {
     expect(r).toHaveLength(6);
     expect(r.every((x) => x.type === "trial_end")).toBe(true);
   });
+  it("14b: trial with a stop date gets only stop_date rows", () => {
+    const r = desiredReminders(
+      sub({
+        stopDate: "2026-12-01",
+        isTrial: true,
+        trialEndDate: "2026-12-04",
+        nextRenewalDate: "2026-12-04",
+      }),
+      utc,
+      now,
+    );
+    expect(r).toHaveLength(6);
+    expect(r.every((x) => x.type === "stop_date")).toBe(true);
+  });
   it("15: invalid timezone throws", () => {
     expect(() => desiredReminders(sub(), { ...utc, timezone: "Nope/Zone" }, now)).toThrow(
       RangeError,
