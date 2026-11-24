@@ -33,6 +33,7 @@ export default async function SettingsPage() {
               : DEFAULT_REMINDER_DAYS
             ).join(", "),
             reminder_hour: String(profile.reminder_hour),
+            email_reminders: profile.email_reminders ? "on" : "",
           }}
         />
       ) : (

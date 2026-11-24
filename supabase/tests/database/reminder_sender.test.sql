@@ -51,6 +51,14 @@ update public.reminders set claimed_until = null where id = '00000000-0000-0000-
 select is((select sub_inactive from public.claim_due_reminders(1)), true, 'archived sub gives sub_inactive true');
 update public.subscriptions set archived_at = null where id = '11111111-1111-1111-1111-111111111111';
 
+-- T-011 columns.
+update public.reminders set claimed_until = null where id = '00000000-0000-0000-0000-000000000001';
+select results_eq(
+  $q$select subscription_id, cancel_url, price_minor, currency, timezone, email_reminders from public.claim_due_reminders(1)$q$,
+  $q$values ('11111111-1111-1111-1111-111111111111'::uuid, null::text, 100, 'USD'::text, 'UTC'::text, true)$q$,
+  'claim returns subscription, cancel_url, price, currency, timezone and email_reminders');
+update public.reminders set claimed_until = null where id = '00000000-0000-0000-0000-000000000001';
+
 -- Criteria 4: mark sent, then a second mark changes nothing.
 select is(public.mark_reminder_result('00000000-0000-0000-0000-000000000001', 'sent'), 'sent', 'mark sent returns sent');
 select results_eq(

@@ -217,6 +217,23 @@ export function SettingsForm({
         )}
       </Field>
 
+      <div className="flex flex-col gap-1">
+        <div className="flex min-h-11 items-center gap-3">
+          <input
+            id="email_reminders"
+            name="email_reminders"
+            type="checkbox"
+            defaultChecked={val("email_reminders") === "on"}
+            aria-describedby="email_reminders-help"
+            className="size-5 accent-primary"
+          />
+          <Label htmlFor="email_reminders">{FIELD_LABELS.email_reminders}</Label>
+        </div>
+        <p id="email_reminders-help" className="text-sm text-muted-foreground">
+          In-app reminders stay on.
+        </p>
+      </div>
+
       <div className="flex flex-wrap items-center gap-4">
         <Button type="submit" disabled={pending} aria-busy={pending}>
           {pending && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}

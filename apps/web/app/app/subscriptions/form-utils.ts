@@ -1,3 +1,4 @@
+import type { BillingCycle } from "@app/core";
 import type { FieldErrors, SimpleResult, SubField, SubResult } from "../../../lib/subscriptions";
 
 export const FIELD_LABELS: Record<SubField, string> = {
@@ -48,3 +49,17 @@ export function toState(result: SubResult, savedId?: string): SubState {
 
 export const toActionResult = (r: SimpleResult): ActionResult =>
   r.ok ? r : { ok: false, message: MESSAGES[r.error] };
+
+export const PAYMENT_LABELS = [
+  ["none", "Not set"],
+  ["wise", "Wise virtual card"],
+  ["privacy", "Privacy.com card"],
+  ["other_virtual", "Other virtual card"],
+] as const;
+export const CYCLE_LABELS: Record<BillingCycle, string> = {
+  weekly: "Weekly",
+  monthly: "Monthly",
+  quarterly: "Every 3 months",
+  yearly: "Yearly",
+  custom: "Custom (every N days)",
+};

@@ -9,9 +9,11 @@ import {
   type Status,
 } from "./handler";
 import { alertFounder, inAppSender, stubEmailSender } from "./senders";
+import type { EmailTransport } from "./resend";
 
 const row = (o: Partial<ClaimedReminder> = {}): ClaimedReminder => ({
   id: "r1",
+  subscriptionId: "s1",
   userId: "u1",
   type: "stop_date",
   channel: "in_app",
@@ -20,16 +22,24 @@ const row = (o: Partial<ClaimedReminder> = {}): ClaimedReminder => ({
   subInactive: false,
   attempts: 0,
   fireAt: "2026-11-24T09:00:00.000Z",
+  cancelUrl: null,
+  priceMinor: 999,
+  currency: "USD",
+  timezone: "UTC",
+  stopDate: "2026-12-12",
+  nextRenewalDate: "2026-12-15",
+  trialEndDate: null,
+  emailReminders: true,
   ...o,
 });
 
 // Fake db that mirrors the SQL retry rule: attempts + 1 >= 3 gives failed.
 function fakeDb(rows: ClaimedReminder[]) {
-  const marks: { id: string; outcome: Outcome; error?: string }[] = [];
+  const marks: { id: string; outcome: Outcome; error?: string; ref?: string }[] = [];
   const db: SenderDb = {
     claim: () => Promise.resolve(rows),
-    mark: (id, outcome, error) => {
-      marks.push({ id, outcome, error });
+    mark: (id, outcome, error, ref) => {
+      marks.push({ id, outcome, error, ref });
       const r = rows.find((x) => x.id === id)!;
       const s: Status =
         outcome === "retry" ? (r.attempts + 1 >= 3 ? "failed" : "pending") : outcome;
@@ -90,7 +100,7 @@ describe("runDueReminders", () => {
     const { db, marks } = fakeDb([row()]);
     const res = await runDueReminders({ db, senders: { in_app: inAppSender }, alerter: alerter() });
     expect(res.sent).toBe(1);
-    expect(marks).toEqual([{ id: "r1", outcome: "sent", error: undefined }]);
+    expect(marks).toEqual([{ id: "r1", outcome: "sent", error: undefined, ref: undefined }]);
   });
 
   it("treats a missing sender and a null email as errors", async () => {
@@ -110,7 +120,8 @@ describe("runDueReminders", () => {
     const rows = [row({ id: "a" }), row({ id: "b" })];
     const { db } = fakeDb(rows);
     const mark = db.mark;
-    db.mark = (id, o, e) => (id === "a" ? Promise.reject(new Error("db")) : mark(id, o, e));
+    db.mark = (id, o, e, f) =>
+      id === "a" ? Promise.reject(new Error("db")) : mark(id, o, e, f);
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const res = await runDueReminders({ db, senders: { in_app: inAppSender }, alerter: alerter() });
     spy.mockRestore();
@@ -163,11 +174,104 @@ describe("auth and http", () => {
   });
 });
 
+describe("send rules", () => {
+  const NOW = () => new Date("2026-11-24T12:00:00Z");
+
+  it("passes the provider ref to mark", async () => {
+    const { db, marks } = fakeDb([row({ channel: "email" })]);
+    const email = { send: vi.fn().mockResolvedValue("re_123") };
+    await runDueReminders({ db, senders: { email }, alerter: alerter(), now: NOW });
+    expect(marks).toEqual([{ id: "r1", outcome: "sent", error: undefined, ref: "re_123" }]);
+  });
+
+  it("skips an email row when the user opted out, with no send; in_app is unaffected", async () => {
+    const { db, marks } = fakeDb([
+      row({ id: "e", channel: "email", emailReminders: false }),
+      row({ id: "i", channel: "in_app", emailReminders: false }),
+    ]);
+    const email = { send: vi.fn() };
+    const res = await runDueReminders({
+      db,
+      senders: { email, in_app: inAppSender },
+      alerter: alerter(),
+      now: NOW,
+    });
+    expect(email.send).not.toHaveBeenCalled();
+    expect(marks.map((m) => [m.id, m.outcome])).toEqual([
+      ["e", "skipped"],
+      ["i", "sent"],
+    ]);
+    expect(res.skipped).toBe(1);
+  });
+
+  it("skips a row whose key date is past, by type", async () => {
+    const { db, marks } = fakeDb([
+      row({ id: "a", stopDate: "2026-11-23" }),
+      row({ id: "b", type: "renewal", nextRenewalDate: "2026-11-23" }),
+      row({ id: "c", type: "trial_end", trialEndDate: "2026-11-23" }),
+      row({ id: "d", stopDate: "2026-11-24" }),
+      row({ id: "e", type: "trial_end", trialEndDate: null }),
+    ]);
+    await runDueReminders({ db, senders: { in_app: inAppSender }, alerter: alerter(), now: NOW });
+    expect(marks.map((m) => `${m.id}:${m.outcome}`)).toEqual([
+      "a:skipped",
+      "b:skipped",
+      "c:skipped",
+      "d:sent",
+      "e:sent",
+    ]);
+  });
+
+  it("uses the user timezone for today", async () => {
+    // 2026-11-24 20:00 UTC is already 25 Nov in Kuala Lumpur.
+    const { db, marks } = fakeDb([row({ timezone: "Asia/Kuala_Lumpur", stopDate: "2026-11-24" })]);
+    await runDueReminders({
+      db,
+      senders: { in_app: inAppSender },
+      alerter: alerter(),
+      now: () => new Date("2026-11-24T20:00:00Z"),
+    });
+    expect(marks[0]!.outcome).toBe("skipped");
+  });
+});
+
 describe("alertFounder", () => {
-  it("sends to the founder address and throws when it is unset", async () => {
-    const send = vi.fn().mockResolvedValue(undefined);
-    await alertFounder({ send }, "f@example.com").alert(row(), "boom");
-    expect(send.mock.calls[0]![0].userEmail).toBe("f@example.com");
-    await expect(alertFounder({ send }, undefined).alert(row(), "boom")).rejects.toThrow();
+  const opts = { appUrl: "https://app.example.com", brand: "StopDate" };
+  it("sends a body with ids and error, no user email or name; throws when unset", async () => {
+    const sendEmail = vi.fn().mockResolvedValue("id");
+    const t: EmailTransport = { sendEmail };
+    await alertFounder(t, "f@example.com", opts).alert(row({ attempts: 2 }), "resend 500");
+    const m = sendEmail.mock.calls[0]![0];
+    expect(m.to).toBe("f@example.com");
+    for (const part of ["r1", "stop_date", "in_app", "resend 500", "u1", "s1", "3"]) {
+      expect(m.text).toContain(part);
+    }
+    expect(m.text + m.html + m.subject).not.toContain("a@example.com");
+    expect(m.text + m.html + m.subject).not.toContain("Netflix");
+    await expect(alertFounder(t, undefined, opts).alert(row(), "boom")).rejects.toThrow();
+    await expect(alertFounder(null, "f@example.com", opts).alert(row(), "boom")).rejects.toThrow();
+  });
+});
+
+describe("failure flow", () => {
+  it("three Resend 500s end failed with one alert", async () => {
+    const r = row({ channel: "email" });
+    const fetchFn = vi.fn().mockResolvedValue(new Response("{}", { status: 500 }));
+    const { createResendTransport } = await import("./resend");
+    const { emailReminderSender } = await import("./senders");
+    const transport = createResendTransport({ apiKey: "k", from: "f@x.com", fetch: fetchFn });
+    const sender = emailReminderSender(transport, { appUrl: "https://a.com", brand: "StopDate" });
+    const a = alerter();
+    for (let attempts = 0; attempts < 3; attempts++) {
+      const { db } = fakeDb([{ ...r, attempts }]);
+      await runDueReminders({
+        db,
+        senders: { email: sender },
+        alerter: a,
+        now: () => new Date("2026-11-24T00:00:00Z"),
+      });
+    }
+    expect(a.alert).toHaveBeenCalledTimes(1);
+    expect(a.alert).toHaveBeenCalledWith(expect.anything(), "resend 500");
   });
 });

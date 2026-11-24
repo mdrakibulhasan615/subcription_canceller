@@ -26,6 +26,7 @@ const profile = (o: Partial<ProfileSettings> = {}): ProfileSettings => ({
   default_stop_days_before: 3,
   reminder_days: [7, 3, 1],
   reminder_hour: 9,
+  email_reminders: true,
   ...o,
 });
 const form = (o: Record<string, string> = {}) => {
@@ -84,7 +85,15 @@ function fake(opts: { profile?: ProfileSettings | null; failInserts?: boolean } 
     },
     async getSub(userId, id) {
       const s = subs.get(id);
-      return s && s.user_id === userId ? s : null;
+      return s && s.user_id === userId
+        ? { ...s, stop_confirmed_at: null, merchant_cancelled_at: null, created_at: "" }
+        : null;
+    },
+    async listSubs() {
+      return [];
+    },
+    async listRemindersForSub() {
+      return [];
     },
     async listSubNames() {
       return [];
@@ -235,7 +244,7 @@ async function seed(db: SubDb) {
     trial_end_date: null,
     user_id: USER,
   });
-  return (await db.getSub(USER, id))!;
+  return (await db.getSub(USER, id))! as SubDetail; // test rows always have both dates
 }
 
 describe("archive, unarchive, delete", () => {

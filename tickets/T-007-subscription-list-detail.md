@@ -1,7 +1,7 @@
 ﻿---
 id: T-007
 title: Subscription list and detail, statuses, cancel-link checklist, honesty copy
-status: BUILDING
+status: TESTING
 milestone: MVP
 ui: true
 depends_on: [T-006]
@@ -50,6 +50,7 @@ Reviewer: skip (read-only UI; Tester covers).
 
 ## Design (Designer)
 ## Build notes (Builder)
+Built. 205/206 tests pass (the one failure is T-011 mid-edit). Files: lib/subscriptions.ts (SubFull, HistoryRow, listSubs, listRemindersForSub), lib/sub-view.ts (+test), app/app/subscriptions/{page,[id]/page,status-badge(+test)}, label maps moved to form-utils.ts. globals.css untouched (tokens exist). Deviations: stop_date also nullable in SubFull; getSub returns SubFull; loadDetail returns {sub,row,status,today,tz,reminders,guide,store}; loadList returns {rows,total,params}; zero-state "Add your first subscription to set a stop date."; checklist heading is h3 under h2. Unverified: browser, 320px, dark mode, live DB, bare "Cancelled" absence on detail page.
 ## Test report (Tester)
 ## Review verdict (Reviewer)
 <!-- VERDICT: PASS | NEEDS_FIXES -->

@@ -9,6 +9,7 @@ export const FIELD_ORDER: FieldName[] = [
   "default_stop_days_before",
   "reminder_days",
   "reminder_hour",
+  "email_reminders",
 ];
 export const FIELD_LABELS: Record<FieldName, string> = {
   display_name: "Display name",
@@ -17,6 +18,7 @@ export const FIELD_LABELS: Record<FieldName, string> = {
   default_stop_days_before: "Default stop days before renewal",
   reminder_days: "Reminder days",
   reminder_hour: "Reminder hour",
+  email_reminders: "Send reminders by email",
 };
 
 export type FormValues = Record<FieldName, string>;
@@ -44,6 +46,8 @@ export function formValues(fd: FormData): Partial<FormValues> {
     const v = str(fd, k);
     if (v !== undefined) out[k] = v;
   }
+  // An unchecked box is not sent at all. "on" means checked, "" means unchecked.
+  out.email_reminders = fd.get("email_reminders") === "on" ? "on" : "";
   return out;
 }
 
@@ -57,6 +61,7 @@ export function parseSettingsForm(fd: FormData): Record<string, unknown> {
     default_stop_days_before: num(str(fd, "default_stop_days_before")),
     reminder_days: days === undefined ? undefined : days.split(",").map((d) => num(d)),
     reminder_hour: num(str(fd, "reminder_hour")),
+    email_reminders: fd.get("email_reminders") === "on",
   };
 }
 

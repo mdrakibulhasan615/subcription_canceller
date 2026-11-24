@@ -51,6 +51,7 @@ export const FIELD_MESSAGES: Record<keyof ProfileSettings, string> = {
   default_stop_days_before: "Enter a whole number from 0 to 60.",
   reminder_days: "Enter 1 to 5 whole numbers from 1 to 365, like 7, 3, 1.",
   reminder_hour: "Choose an hour from the list.",
+  email_reminders: "Choose on or off.",
 };
 
 const toSubInput = (s: SubRow): ReminderSubInput => ({
@@ -136,7 +137,7 @@ export async function saveProfileSettings(
 }
 
 const PROFILE_COLS =
-  "display_name, timezone, currency, default_stop_days_before, reminder_days, reminder_hour";
+  "display_name, timezone, currency, default_stop_days_before, reminder_days, reminder_hour, email_reminders";
 const SUB_COLS =
   "id, stop_date, next_renewal_date, is_trial, trial_end_date, stop_confirmed_at, merchant_cancelled_at, archived_at";
 const CHUNK = 100;

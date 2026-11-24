@@ -16,6 +16,7 @@ const input = {
   default_stop_days_before: 3,
   reminder_days: [7, 3, 1],
   reminder_hour: 9,
+  email_reminders: true,
 };
 const sub = (id: string, stop: string): SubRow => ({
   id,

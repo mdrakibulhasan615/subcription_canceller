@@ -8,6 +8,7 @@ const ok = {
   default_stop_days_before: 3,
   reminder_days: [7, 3, 1],
   reminder_hour: 9,
+  email_reminders: true,
 };
 const bad = (patch: object) => {
   const r = profileSettingsSchema.safeParse({ ...ok, ...patch });

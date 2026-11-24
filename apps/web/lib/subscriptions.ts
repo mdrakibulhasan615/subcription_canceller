@@ -47,10 +47,27 @@ export interface SubWrite {
   trial_end_date: string | null;
 }
 export type SubDetail = SubWrite & { id: string; archived_at: string | null };
+/** A stored row with the status columns. The renewal and stop dates may be null in the DB. */
+export type SubFull = Omit<SubDetail, "next_renewal_date" | "stop_date"> & {
+  next_renewal_date: string | null;
+  stop_date: string | null;
+  stop_confirmed_at: string | null;
+  merchant_cancelled_at: string | null;
+  created_at: string;
+};
+export interface HistoryRow {
+  type: string;
+  channel: string;
+  fire_at: string;
+  status: string;
+  sent_at: string | null;
+}
 
 /** Methods throw on failure. The boolean is false when no row of this user matched. */
 export interface SubDb extends DbLike {
-  getSub(userId: string, id: string): Promise<SubDetail | null>;
+  getSub(userId: string, id: string): Promise<SubFull | null>;
+  listSubs(userId: string): Promise<SubFull[]>;
+  listRemindersForSub(userId: string, subId: string): Promise<HistoryRow[]>;
   listSubNames(userId: string): Promise<{ id: string; name: string; archived_at: string | null }[]>;
   insertSub(row: SubWrite & { user_id: string }): Promise<string>;
   updateSub(userId: string, id: string, row: SubWrite): Promise<boolean>;
@@ -273,7 +290,7 @@ export const deleteSubscription = (db: SubDb, userId: string, id: string, now: D
   change(db, userId, now, () => db.deleteSub(userId, id), false);
 
 const COLS =
-  "id, name, category, price_minor, currency, billing_cycle, billing_interval, next_renewal_date, stop_date, payment_method_type, card_nickname, cancel_url, notes, is_trial, trial_end_date, archived_at";
+  "id, name, category, price_minor, currency, billing_cycle, billing_interval, next_renewal_date, stop_date, payment_method_type, card_nickname, cancel_url, notes, is_trial, trial_end_date, archived_at, stop_confirmed_at, merchant_cancelled_at, created_at";
 
 /** Supabase adapter. Thin glue, tested only by hand. RLS limits every call to the signed-in user. */
 export function createSubDb(sb: SupabaseClient): SubDb {
@@ -287,7 +304,21 @@ export function createSubDb(sb: SupabaseClient): SubDb {
         .match(mine(userId, id))
         .maybeSingle();
       if (error) throw error;
-      return (data as SubDetail | null) ?? null;
+      return (data as SubFull | null) ?? null;
+    },
+    async listSubs(userId) {
+      const { data, error } = await sb.from("subscriptions").select(COLS).eq("user_id", userId);
+      if (error) throw error;
+      return data as SubFull[];
+    },
+    async listRemindersForSub(userId, subId) {
+      const { data, error } = await sb
+        .from("reminders")
+        .select("type, channel, fire_at, status, sent_at")
+        .match({ user_id: userId, subscription_id: subId })
+        .order("fire_at");
+      if (error) throw error;
+      return data as HistoryRow[];
     },
     async listSubNames(userId) {
       const { data, error } = await sb

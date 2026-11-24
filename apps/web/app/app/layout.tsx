@@ -3,12 +3,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BRAND } from "@app/core";
 import { Button } from "../../components/ui/button";
-import { getClaims } from "../../lib/supabase/server";
+import { createClient, getClaims } from "../../lib/supabase/server";
+import { formatBadge, unreadCount } from "../../lib/notifications";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const claims = await getClaims();
   // The proxy is not the only gate.
   if (!claims) redirect("/sign-in?next=%2Fapp");
+  const unread = await unreadCount(await createClient());
   return (
     <>
       <a
@@ -42,6 +44,21 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium underline-offset-4 hover:underline"
         >
           Settings
+        </Link>
+        <Link
+          href="/app/notifications"
+          aria-label={unread > 0 ? `Notifications, ${unread} unread` : undefined}
+          className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium underline-offset-4 hover:underline"
+        >
+          Notifications
+          {unread > 0 && (
+            <span
+              aria-hidden="true"
+              className="rounded-sm bg-primary px-2 text-xs leading-6 font-semibold text-primary-foreground"
+            >
+              {formatBadge(unread)}
+            </span>
+          )}
         </Link>
       </nav>
       <main id="main" className="mx-auto max-w-5xl px-4 py-12 md:px-6 lg:px-8">

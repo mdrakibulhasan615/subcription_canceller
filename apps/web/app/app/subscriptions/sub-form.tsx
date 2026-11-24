@@ -24,27 +24,13 @@ import {
   type SubField,
 } from "../../../lib/subscriptions";
 import { describedBy } from "../settings/form-utils";
-import { FIELD_LABELS, type SubState } from "./form-utils";
+import { CYCLE_LABELS, FIELD_LABELS, PAYMENT_LABELS, type SubState } from "./form-utils";
 
 type Action = (prev: SubState, fd: FormData) => Promise<SubState>;
 export type SubFormValues = Record<Exclude<SubField, "is_trial">, string> & { is_trial: boolean };
 
 const selectClass =
   "h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground aria-invalid:border-destructive";
-const PAYMENT_LABELS = [
-  ["none", "Not set"],
-  ["wise", "Wise virtual card"],
-  ["privacy", "Privacy.com card"],
-  ["other_virtual", "Other virtual card"],
-] as const;
-const CYCLE_LABELS: Record<BillingCycle, string> = {
-  weekly: "Weekly",
-  monthly: "Monthly",
-  quarterly: "Every 3 months",
-  yearly: "Yearly",
-  custom: "Custom (every N days)",
-};
-
 function Field(props: {
   name: SubField;
   label?: string;

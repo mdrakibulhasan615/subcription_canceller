@@ -17,6 +17,7 @@ const base = {
   default_stop_days_before: "3",
   reminder_days: "7, 3, 1",
   reminder_hour: "9",
+  email_reminders: "on",
 };
 const parses = (o: Record<string, string>) =>
   profileSettingsSchema.safeParse(parseSettingsForm(form(o)));
@@ -28,6 +29,15 @@ describe("parseSettingsForm", () => {
     expect(parses({ ...base, reminder_days: "7;3" }).success).toBe(false);
     expect(parses({ ...base, reminder_hour: "" }).success).toBe(false);
     expect(profileSettingsSchema.safeParse(parseSettingsForm(new FormData())).success).toBe(false);
+  });
+
+  it("parses the email checkbox: on is true, missing is false", () => {
+    const on = parses(base);
+    expect(on.success && on.data.email_reminders).toBe(true);
+    const { email_reminders: _omit, ...rest } = base;
+    void _omit;
+    const off = parses(rest);
+    expect(off.success && off.data.email_reminders).toBe(false);
   });
 });
 
@@ -57,6 +67,19 @@ describe("markup", () => {
       expect(h).toContain(`id="${n}"`);
     }
     expect(h).toContain('role="status"');
+    expect(h).toContain("checked");
+  });
+
+  it("shows the checkbox unchecked when email_reminders is off", () => {
+    const h = renderToStaticMarkup(
+      createElement(SettingsForm, {
+        action: async (): Promise<SettingsState> => ({ status: "saved" }),
+        initial: { ...base, email_reminders: "" },
+      }),
+    );
+    expect(h).toMatch(/<input[^>]*id="email_reminders"/);
+    expect(h).not.toMatch(/<input[^>]*id="email_reminders"[^>]*checked/);
+    expect(h).toContain("In-app reminders stay on.");
   });
 
   it("W8 errors are linked with aria-describedby and the summary lists 2+", () => {

@@ -5,6 +5,7 @@ export type Status = "pending" | "sent" | "failed" | "skipped";
 
 export interface ClaimedReminder {
   id: string;
+  subscriptionId: string;
   userId: string;
   type: string;
   channel: string;
@@ -13,16 +14,24 @@ export interface ClaimedReminder {
   subInactive: boolean;
   attempts: number;
   fireAt: string;
+  cancelUrl: string | null;
+  priceMinor: number;
+  currency: string;
+  timezone: string;
+  stopDate: string | null;
+  nextRenewalDate: string | null;
+  trialEndDate: string | null;
+  emailReminders: boolean;
 }
 
 export interface ChannelSender {
-  /** Throws on failure. */
-  send(r: ClaimedReminder): Promise<void>;
+  /** Throws on failure. Returns the provider message id when there is one. */
+  send(r: ClaimedReminder): Promise<string | void>;
 }
 
 export interface SenderDb {
   claim(batch: number): Promise<ClaimedReminder[]>;
-  mark(id: string, outcome: Outcome, error?: string): Promise<Status>;
+  mark(id: string, outcome: Outcome, error?: string, ref?: string): Promise<Status>;
 }
 
 export interface Alerter {
@@ -34,6 +43,7 @@ export interface RunDeps {
   senders: Record<string, ChannelSender | undefined>;
   alerter: Alerter;
   batch?: number;
+  now?: () => Date;
 }
 
 export interface RunResult {
@@ -46,6 +56,23 @@ export interface RunResult {
 
 const MAX_BATCH = 200;
 
+/** Date of the event this reminder is about. */
+export function keyDate(r: Pick<ClaimedReminder, "type" | "stopDate" | "nextRenewalDate" | "trialEndDate">) {
+  if (r.type === "stop_date") return r.stopDate;
+  if (r.type === "renewal") return r.nextRenewalDate;
+  if (r.type === "trial_end") return r.trialEndDate;
+  return null;
+}
+
+/** Today as YYYY-MM-DD in the user's timezone. A bad timezone falls back to UTC. */
+function todayIn(timezone: string, now: Date): string {
+  try {
+    return new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(now);
+  } catch {
+    return now.toISOString().slice(0, 10);
+  }
+}
+
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 export async function runDueReminders({
@@ -53,6 +80,7 @@ export async function runDueReminders({
   senders,
   alerter,
   batch = 50,
+  now = () => new Date(),
 }: RunDeps): Promise<RunResult> {
   const size = Math.min(Math.max(Math.trunc(batch) || 0, 1), MAX_BATCH);
   const rows = await db.claim(size);
@@ -65,17 +93,30 @@ export async function runDueReminders({
         res.skipped++;
         continue;
       }
+      const key = keyDate(r);
+      // A string compare works on YYYY-MM-DD. A past date means the moment has gone.
+      if (key && key < todayIn(r.timezone, now())) {
+        await db.mark(r.id, "skipped");
+        res.skipped++;
+        continue;
+      }
+      if (r.channel === "email" && r.emailReminders === false) {
+        await db.mark(r.id, "skipped");
+        res.skipped++;
+        continue;
+      }
       let error: string | null = null;
+      let ref: string | undefined;
       try {
         const sender = senders[r.channel];
         if (!sender) throw new Error(`no sender for channel ${r.channel}`);
         if (r.channel === "email" && !r.userEmail) throw new Error("user has no email");
-        await sender.send(r);
+        ref = (await sender.send(r)) || undefined;
       } catch (e) {
         error = msg(e);
       }
       if (error === null) {
-        await db.mark(r.id, "sent");
+        await db.mark(r.id, "sent", undefined, ref);
         res.sent++;
         continue;
       }

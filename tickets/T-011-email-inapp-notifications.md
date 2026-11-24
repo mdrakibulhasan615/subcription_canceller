@@ -1,7 +1,7 @@
 ﻿---
 id: T-011
 title: Email channel (Resend) and in-app notifications
-status: BUILDING
+status: REVIEWING
 milestone: MVP
 ui: true
 depends_on: [T-009]
@@ -62,6 +62,7 @@ Reviewer: yes (email, cap trigger, grants).
 
 ## Design (Designer)
 ## Build notes (Builder)
+Built. 227 tests, build ok. SQL not run locally (CI). Migration 000007 + 3 pgTAP files; Edge Function email-template/resend/senders/handler/index updated; README go-live checklist; core + settings email_reminders; notifications lib + page + actions; layout nav badge. Deviations: one-line edit in lib/subscriptions.test.ts (email_reminders:true); prettier --write over apps/web/app/app and lib; email/in-app date = key date by type so a RENEWAL reminder reads "Payments stop on <renewal date>" (CEO concern: wrong wording for renewals, Reviewer to check/fix); alert shows attempts+1; alertFounder takes null transport when unconfigured and throws; unread marker icon + "Unread" text. Unverified: SQL/cap trigger under parallel inserts, reopen one-off, Deno index.ts, live Resend, browser. If APP_URL unset, email links are relative.
 ## Test report (Tester)
 ## Review verdict (Reviewer)
 <!-- VERDICT: PASS | NEEDS_FIXES -->

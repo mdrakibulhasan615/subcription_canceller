@@ -19,6 +19,7 @@ export const profileSettingsSchema = z.object({
     .max(5)
     .transform((d) => [...new Set(d)].sort((a, b) => b - a)),
   reminder_hour: z.number().int().min(0).max(23),
+  email_reminders: z.boolean(),
 });
 
 export type ProfileSettings = z.infer<typeof profileSettingsSchema>;
