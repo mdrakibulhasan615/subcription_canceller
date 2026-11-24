@@ -70,11 +70,11 @@ T-017 | Dashboard (ui) | DONE | - | nav + brand link added
 T-018 | CSV import (ui) | DONE | - | polish batch: name echo, copy, plural
 T-019 | Onboarding (ui) | DONE | - | CI verified; one-shot flag; step order changed
 T-020 | Landing + waitlist (ui) | DONE | - | Tailwind+shadcn base; 77 tests
-T-021 | Events + metrics SQL + card question (ui) | BUILDING | builder | Reviewer required; migration 000009
+T-021 | Events + metrics SQL + card question (ui) | DONE | - | CI verified; check app_opened after first deploy
 T-022 | Sentry + legal pages (ui) | DONE | - | placeholder contact email; T-021 updates analytics line
 T-023 | Export + account delete (ui) | DONE | - | manual: amr claim, live delete; SERVICE_ROLE_KEY on Vercel
 T-024 | Web push | POST_MVP | - | decided 2026-11-25; spec in the ticket
-T-025 | Time tests + public axe + manual QA (T-025a); e2e smoke CI (T-025b) | T-025a BUILDING | builder | e2e extended POST_MVP
+T-025 | T-025a DONE (time tests, public axe, manual QA); T-025b e2e smoke CI | T-025b BUILDING | builder | extended e2e POST_MVP
 
 ## Open Questions / Risks
 - Standing order (developer, 2026-11-24): run T-001 to T-025 without check-ins. CEO approves. Reviewer only when needed (security, DB, scheduler, risky). Ask developer only if blocked.

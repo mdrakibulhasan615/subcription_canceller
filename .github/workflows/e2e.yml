@@ -1,0 +1,127 @@
+# End-to-end smoke tests (Playwright) against a LOCAL Supabase stack started by the CLI.
+# Nobody can run this on a dev machine (no Docker). CI is the only place it runs.
+#
+# HOW TO DIAGNOSE A FAILED RUN
+# 1. Open the run, then the job log. Find the first red step.
+#    - "Start Supabase" red: a container did not start. Read the CLI error. Check config.toml
+#      (the Google provider reads env SUPABASE_AUTH_EXTERNAL_GOOGLE_*; this file sets dummies).
+#    - "Read Supabase keys" red: `supabase status -o env` did not print API_URL, ANON_KEY or
+#      SERVICE_ROLE_KEY. The CLI changed its names: fix the grep in that step.
+#    - "Build" or "Start app" red: read the Next.js error. "Wait for app" prints app.log.
+#    - "Playwright" red: go to step 2.
+# 2. Download the artifact "e2e-report" from the run summary. It holds:
+#    - playwright-report/index.html : open in a browser. Failed tests show the error, the
+#      step list, a screenshot, and the trace (retain-on-failure; retries: 1 keeps both runs).
+#    - test-results/<test>/trace.zip : run `npx playwright show-trace trace.zip` locally, or
+#      drop it on https://trace.playwright.dev. It shows DOM, network and console per step.
+#    - app.log : the Next.js server log (server action errors show here, not in the browser).
+# 3. If the step "Show Supabase logs" ran (failure only), read the tail of the auth and mail
+#    containers in the job log:
+#    - auth log: sign-in errors, redirect-URL rejections ("requested path is invalid"),
+#      rate limits.
+#    - mail log: whether the magic-link mail arrived.
+# 4. Common causes:
+#    - S1 fails at "no magic-link mail": the mail catcher URL or flavour differs (Inbucket vs
+#      Mailpit). See e2e/helpers/mail.ts and the E2E_MAIL_URL env set below.
+#    - S1 lands on /sign-in?error=callback: the PKCE exchange failed. Check the auth log and
+#      the redirect allow-list in supabase/config.toml.
+#    - S2 to S5 land on /sign-in: the session cookie was not accepted. Check app.log and
+#      e2e/helpers/supabase.ts (signIn).
+#    - Date text differs: the app and the test format dates with en-GB (e2e/helpers/app.ts).
+# The keys below belong to the throwaway local stack of this job. They are not secrets.
+
+name: E2E
+on:
+  pull_request:
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "supabase/**"
+      - "e2e/**"
+      - "playwright.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/e2e.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: supabase/setup-cli@v3.2.0
+        with:
+          version: 3.3.0
+      - name: Start Supabase
+        env:
+          # config.toml enables Google with env() values. Dummies keep the auth container from failing.
+          SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID: ci-dummy
+          SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET: ci-dummy
+        run: supabase start -x studio,imgproxy,vector,logflare
+      - name: Read Supabase keys
+        run: |
+          supabase status -o env > "$RUNNER_TEMP/status.env"
+          get() { grep -E "^$1=" "$RUNNER_TEMP/status.env" | head -1 | cut -d= -f2- | tr -d '"'; }
+          for k in API_URL ANON_KEY SERVICE_ROLE_KEY; do
+            if [ -z "$(get $k)" ]; then
+              echo "::error::supabase status -o env has no $k. Names found:"
+              cut -d= -f1 "$RUNNER_TEMP/status.env"
+              exit 1
+            fi
+          done
+          echo "::add-mask::$(get ANON_KEY)"
+          echo "::add-mask::$(get SERVICE_ROLE_KEY)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(get API_URL)"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(get ANON_KEY)"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$(get SERVICE_ROLE_KEY)"
+            echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000"
+            mail="$(get INBUCKET_URL)"; [ -n "$mail" ] || mail="$(get MAILPIT_URL)"
+            echo "E2E_MAIL_URL=${mail:-http://127.0.0.1:54324}"
+          } >> "$GITHUB_ENV"
+      - run: pnpm exec playwright install --with-deps chromium
+      # The NEXT_PUBLIC_* values are inlined into the browser bundle at build time.
+      - run: pnpm build
+      - name: Start app
+        run: nohup pnpm --filter @app/web start > app.log 2>&1 &
+      - name: Wait for app
+        run: |
+          if ! curl -fsS -o /dev/null --retry 45 --retry-delay 2 --retry-connrefused http://localhost:3000/sign-in; then
+            echo "::error::app did not start. app.log:"
+            cat app.log
+            exit 1
+          fi
+      - name: Playwright
+        run: pnpm exec playwright test --project=smoke --project=public
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: |
+            playwright-report/
+            test-results/
+            app.log
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Show Supabase logs
+        if: failure()
+        run: |
+          for c in $(docker ps -a --format '{{.Names}}' | grep -E 'auth|gotrue|inbucket|mailpit'); do
+            echo "::group::$c"
+            docker logs --tail 150 "$c" 2>&1 || true
+            echo "::endgroup::"
+          done

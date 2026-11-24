@@ -9,7 +9,8 @@ export default defineConfig({
   webServer: {
     command: "pnpm --filter @app/web start",
     url: `http://localhost:${port}`,
-    reuseExistingServer: !ci,
+    // CI: the workflow starts the app (with the Supabase env) and waits for it.
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   use: {
@@ -21,5 +22,15 @@ export default defineConfig({
   retries: ci ? 1 : 0,
   workers: ci ? 1 : undefined,
   reporter: [["list"], ["html", { open: "never" }]],
-  projects: [{ name: "public", testMatch: "a11y/public.spec.ts" }],
+  projects: [
+    { name: "public", testMatch: "a11y/public.spec.ts" },
+    {
+      // Needs a local Supabase stack and the env from the e2e workflow (see .github/workflows/e2e.yml).
+      name: "smoke",
+      testMatch: "smoke/*.spec.ts",
+      timeout: 90_000,
+      // The profile default zone is UTC: dates in the specs are computed in UTC.
+      use: { timezoneId: "UTC" },
+    },
+  ],
 });

@@ -50,6 +50,7 @@ Reviewer: skip (tests and docs; polish fixes are small; Tester runs the final MV
 
 ## Design (Designer)
 ## Build notes (Builder)
+T-025a DONE 2026-11-25: 7 fake-clock tests (reminders.time.test.ts), 3 handler tests (outage/recovery/lease), 1 pgTAP append, 30 public Playwright axe tests (zero violations at 375/1280, light and dark; chromium installed locally; webServer pnpm --filter @app/web start), docs/manual-qa.md with the final MVP run definition, polish fixes (Undo focus + labels, radio aria-describedby, live region on stop-date help, CSV plural/period/card-like name masked). 402 tests; CI + DB green on 88ebda1 (14 pgTAP files, 229 tests). Aria-labels do not include the subscription name. Not verified in a browser: the focus move to Undo, aria-describedby on the radio fieldset. Authenticated axe deferred (E6, POST_MVP). NEXT: T-025b (CI-only e2e smoke).
 ## Test report (Tester)
 ## Review verdict (Reviewer)
 <!-- VERDICT: PASS | NEEDS_FIXES -->

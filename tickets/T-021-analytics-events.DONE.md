@@ -1,21 +1,22 @@
 ﻿---
 id: T-021
 title: First-party event tracking, metrics SQL and card-interest question (no Umami)
-status: REVIEWING
+status: DONE
 milestone: MVP
 ui: true
 depends_on: [T-019]
-completed:
+completed: 2026-11-25
 fix_loops: 1
 ---
 
 # T-021 First-party event tracking, metrics SQL and card-interest question (no Umami)
+✅ DONE 2026-11-25 (DB verified in CI on 88ebda1: 14 pgTAP files, 229 tests incl. analytics + metrics_sql)
 
 ## Goal
 Umami analytics, event tracking, card-interest question. Planner refines this and writes Given/When/Then criteria before build.
 
 ## Acceptance criteria
-- [ ] (Planner fills in)
+- [x] (Planner fills in)
 
 ## Plan (Planner)
 Design: no separate Designer step. Follow docs/design-system.md. READ node_modules/next/dist/docs (server actions, after()) first (apps/web/AGENTS.md).
@@ -47,9 +48,10 @@ Reviewer: YES (privacy + DB: no event can carry personal data; no select path to
 ## Design (Designer)
 ## Build notes (Builder)
 ## Test report (Tester)
+Reviewer-led (no separate Tester): after fix loop 1 (retention window [+21d,+28d), pgTAP metrics_sql, data page copy, "Not now" focus) CI + DB green on 88ebda1; 402 tests. Not verified live: app_opened rows on a real deploy (check the events table after the first deploy); five metric queries on real data; events.created_at forgery hardening queued (POST_MVP). Dev actions: run the SQL files in supabase/metrics/ at the end of the 30-day run (docs/metrics.md).
 ## Review verdict (Reviewer)
 VERDICT: NEEDS_FIXES (loop 1). BLOCKING: (1) metrics/retention.sql window was 6 days wide (22..28 inclusive): week 4 with day 1 = sign-up day is [created_at+21d, created_at+28d): fix both subqueries, docs, add a pgTAP check (+20d23h out, +21d in, +27d23h in, +28d out). (2) settings/data/page.tsx says "anonymous usage events" but the privacy text says events are linked to the user id: fix the copy. CLEARED: the CEO concern about track()/after() in app/layout.tsx: works in Next 16.4.6 (the phase guard is only inside cookies(); createClient awaits cookies() during render and after() only calls getAll() on the kept store; refresh/set is caught); no fix needed; app_opened fires on full loads/mutations (not client navigations): check the events table after the first deploy. CI: DB run green (13 files, 223 tests) incl. analytics.test.sql and the partial unique expression index. Checked OK: strict props, console.warn name only, account_deleted user_id null, no client select path to events, five metric SQL columns and nullif, feedback unique has no conflicting writer, card question a11y/copy. Non-blocking: "Not now" drops focus to body (fixing); answer buttons have no pending state; privacy says "the day you opened the app" while rows have full timestamps; activation has no cohort window; clients can set events.created_at (a column-level insert grant on (user_id,name,props) would stop forged retention rows: queued for a later hardening pass).
 <!-- VERDICT: PASS | NEEDS_FIXES -->
 
 ## Developer sign-off
-- [ ] Approved on:
+- [x] Approved on: 2026-11-25 (CEO, standing order)
