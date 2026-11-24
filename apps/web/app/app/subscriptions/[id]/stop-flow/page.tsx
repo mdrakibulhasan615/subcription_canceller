@@ -153,7 +153,10 @@ export default async function StopFlowPage({
           action={stopMethodStepAction.bind(null, sub.id)}
           className="mt-6 flex max-w-prose flex-col gap-4"
         >
-          <fieldset className="flex flex-col gap-3">
+          <fieldset
+            className="flex flex-col gap-3"
+            aria-describedby={err ? "step-error" : undefined}
+          >
             <legend className="mb-2 text-lg font-medium">How will you stop payment?</legend>
             {STOP_METHODS.map((m) => (
               <label

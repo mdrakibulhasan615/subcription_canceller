@@ -10,6 +10,7 @@ export function ErrorSummary({ message }: { message: string }) {
   return (
     <div
       ref={ref}
+      id="step-error"
       tabIndex={-1}
       role="alert"
       className="mt-4 flex max-w-prose items-start gap-2 rounded-lg border border-destructive p-4 text-destructive"

@@ -74,7 +74,7 @@ T-021 | Events + metrics SQL + card question (ui) | BUILDING | builder | Reviewe
 T-022 | Sentry + legal pages (ui) | DONE | - | placeholder contact email; T-021 updates analytics line
 T-023 | Export + account delete (ui) | DONE | - | manual: amr claim, live delete; SERVICE_ROLE_KEY on Vercel
 T-024 | Web push | POST_MVP | - | decided 2026-11-25; spec in the ticket
-T-025 | Time tests + public axe + manual QA (T-025a); e2e smoke CI (T-025b) | PLANNED | - | after T-021; extended e2e POST_MVP
+T-025 | Time tests + public axe + manual QA (T-025a); e2e smoke CI (T-025b) | T-025a BUILDING | builder | e2e extended POST_MVP
 
 ## Open Questions / Risks
 - Standing order (developer, 2026-11-24): run T-001 to T-025 without check-ins. CEO approves. Reviewer only when needed (security, DB, scheduler, risky). Ask developer only if blocked.

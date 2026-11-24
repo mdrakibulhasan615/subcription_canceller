@@ -8,7 +8,7 @@ Five MVP metrics. Four come from existing tables. Only retention needs the `even
 | Stop dates | `stop_dates.sql` | Subscriptions with a stop date, divided by all subscriptions. | 40% |
 | Reminder value | `reminder_value.sql` | Users with a stopped or merchant-cancelled subscription, divided by users with at least one reminder sent. | 30% |
 | Card interest | `card_interest.sql` | Answers "yes" to the card question, divided by all answers. Also shows the "maybe" and "no" counts. | 40% |
-| Retention (week 4) | `retention.sql` | Users with an `app_opened` event 22 to 28 days after sign-up, divided by users who signed up at least 28 days ago. | 25% |
+| Retention (week 4) | `retention.sql` | Users with an `app_opened` event in week 4 (day 1 = sign-up day, week 4 = days 22 to 28), divided by users who signed up at least 28 days ago. | 25% |
 
 ## Caveats
 

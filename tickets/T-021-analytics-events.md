@@ -6,7 +6,7 @@ milestone: MVP
 ui: true
 depends_on: [T-019]
 completed:
-fix_loops: 0
+fix_loops: 1
 ---
 
 # T-021 First-party event tracking, metrics SQL and card-interest question (no Umami)
@@ -48,6 +48,7 @@ Reviewer: YES (privacy + DB: no event can carry personal data; no select path to
 ## Build notes (Builder)
 ## Test report (Tester)
 ## Review verdict (Reviewer)
+VERDICT: NEEDS_FIXES (loop 1). BLOCKING: (1) metrics/retention.sql window was 6 days wide (22..28 inclusive): week 4 with day 1 = sign-up day is [created_at+21d, created_at+28d): fix both subqueries, docs, add a pgTAP check (+20d23h out, +21d in, +27d23h in, +28d out). (2) settings/data/page.tsx says "anonymous usage events" but the privacy text says events are linked to the user id: fix the copy. CLEARED: the CEO concern about track()/after() in app/layout.tsx: works in Next 16.4.6 (the phase guard is only inside cookies(); createClient awaits cookies() during render and after() only calls getAll() on the kept store; refresh/set is caught); no fix needed; app_opened fires on full loads/mutations (not client navigations): check the events table after the first deploy. CI: DB run green (13 files, 223 tests) incl. analytics.test.sql and the partial unique expression index. Checked OK: strict props, console.warn name only, account_deleted user_id null, no client select path to events, five metric SQL columns and nullif, feedback unique has no conflicting writer, card question a11y/copy. Non-blocking: "Not now" drops focus to body (fixing); answer buttons have no pending state; privacy says "the day you opened the app" while rows have full timestamps; activation has no cohort window; clients can set events.created_at (a column-level insert grant on (user_id,name,props) would stop forged retention rows: queued for a later hardening pass).
 <!-- VERDICT: PASS | NEEDS_FIXES -->
 
 ## Developer sign-off

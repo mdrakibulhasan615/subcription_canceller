@@ -56,7 +56,10 @@ export function CardInterest() {
                 type="button"
                 variant="ghost"
                 className="min-h-11"
-                onClick={() => setHidden(true)}
+                onClick={() => {
+                  setHidden(true);
+                  document.getElementById("main")?.focus();
+                }}
               >
                 Not now
               </Button>

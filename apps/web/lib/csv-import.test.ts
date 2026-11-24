@@ -160,6 +160,12 @@ describe("previewImport", () => {
     expect(r.rows.map((x) => x.state)).toEqual(["invalid", "valid", "invalid"]);
     expect(JSON.stringify(r)).not.toContain("4111");
   });
+  it("C10b card number in the name is rejected and masked", async () => {
+    const r = await prev(file(line("4111 1111 1111 1111"), line("Netflix")));
+    expect(r.rows.map((x) => x.state)).toEqual(["invalid", "valid"]);
+    expect(r.rows[0]!.name).toBe("");
+    expect(JSON.stringify(r)).not.toContain("4111");
+  });
   it("C11 past stop date warns, past renewal kept, stop after renewal invalid", async () => {
     const r = await prev(
       file(
@@ -172,6 +178,7 @@ describe("previewImport", () => {
     expect(r.rows.map((x) => x.state)).toEqual(["valid", "valid", "invalid", "invalid"]);
     expect(r.rows[0]!.warnings).toContain("No stop-date reminder will be sent");
     expect(r.rows[3]!.reasons.join()).toContain("YYYY-MM-DD");
+    expect(r.rows[3]!.reasons.join()).not.toMatch(/\) Use YYYY/);
   });
   it("C16 formula-like names are kept as typed", async () => {
     const r = await prev(file(line('"=HYPERLINK(""x"")"')));

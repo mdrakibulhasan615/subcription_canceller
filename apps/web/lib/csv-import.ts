@@ -8,8 +8,10 @@ import {
   type ImportError,
   type ProfileSettings,
 } from "@app/core";
+import { looksLikeCardNumber } from "./card-guard";
 import { rateLimit } from "./rate-limit";
 import {
+  CARD_MESSAGE,
   createSubDb,
   parseSubForm,
   safeRebuild,
@@ -132,13 +134,25 @@ async function analyze(
     const fd = new FormData();
     for (const c of IMPORT_COLUMNS) fd.set(c, cells[c]);
     if (!cells.currency) fd.set("currency", profile.currency);
-    const parsed = parseSubForm(fd, profile);
     const name = cells.name;
+    // A card number in the name is rejected and never echoed in the preview.
+    if (looksLikeCardNumber(name)) {
+      counts.invalid++;
+      rows.push({
+        rowNumber,
+        name: "",
+        state: "invalid",
+        reasons: [`name: ${CARD_MESSAGE}`],
+        warnings: [],
+      });
+      continue;
+    }
+    const parsed = parseSubForm(fd, profile);
     if (!parsed.ok) {
       const reasons = Object.entries(parsed.fieldErrors).map(([f, m]) => {
         const v = cells[f as ImportColumn] ?? "";
         const hint = DATE_COLUMNS.has(f) && v && !DATE_RE.test(v) ? " Use YYYY-MM-DD." : "";
-        return `${f}: ${m}${hint}`;
+        return `${f}: ${m}${hint && !m.endsWith(".") ? "." : ""}${hint}`;
       });
       counts.invalid++;
       rows.push({ rowNumber, name, state: "invalid", reasons, warnings: [] });

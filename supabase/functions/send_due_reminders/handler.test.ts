@@ -275,3 +275,78 @@ describe("failure flow", () => {
     expect(a.alert).toHaveBeenCalledWith(expect.anything(), "resend 500");
   });
 });
+
+// Stateful fake of the SQL claim/mark rules: lease of 10 minutes, failed at attempts + 1 >= 3.
+function leasedDb(base: ClaimedReminder, clock: { t: number }, opts: { markFails?: boolean } = {}) {
+  const s = { attempts: base.attempts, status: "pending" as Status, until: 0 };
+  const db: SenderDb = {
+    claim: () => {
+      if (s.status !== "pending" || s.until > clock.t) return Promise.resolve([]);
+      s.until = clock.t + 10 * 60_000;
+      return Promise.resolve([{ ...base, attempts: s.attempts }]);
+    },
+    mark: (_id, outcome) => {
+      if (opts.markFails) return Promise.reject(new Error("db down"));
+      s.until = 0;
+      if (outcome === "retry") {
+        s.attempts++;
+        s.status = s.attempts >= 3 ? "failed" : "pending";
+      } else s.status = outcome;
+      return Promise.resolve(s.status);
+    },
+  };
+  return { db, s };
+}
+
+describe("outage over several runs", () => {
+  const clock = () => ({ t: Date.parse("2026-11-24T09:00:00Z") });
+
+  it("two send errors then ok: retry, retry, sent, no alert", async () => {
+    const { db, s } = leasedDb(row({ channel: "email" }), clock());
+    const send = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("down"))
+      .mockRejectedValueOnce(new Error("down"))
+      .mockResolvedValue("ref1");
+    const a = alerter();
+    const results = [];
+    for (let i = 0; i < 3; i++) {
+      results.push(await runDueReminders({ db, senders: { email: { send } }, alerter: a }));
+    }
+    expect(send.mock.calls.map((c) => (c[0] as ClaimedReminder).attempts)).toEqual([0, 1, 2]);
+    expect(results.map((r) => [r.retried, r.sent])).toEqual([[1, 0], [1, 0], [0, 1]]);
+    expect(s.status).toBe("sent");
+    expect(a.alert).not.toHaveBeenCalled();
+  });
+
+  it("outage on 3 attempts gives failed and one alert; a 4th run claims nothing", async () => {
+    const { db, s } = leasedDb(row({ channel: "email" }), clock());
+    const send = vi.fn().mockRejectedValue(new Error("down"));
+    const a = alerter();
+    for (let i = 0; i < 3; i++) {
+      await runDueReminders({ db, senders: { email: { send } }, alerter: a });
+    }
+    const fourth = await runDueReminders({ db, senders: { email: { send } }, alerter: a });
+    expect(s.status).toBe("failed");
+    expect(fourth.claimed).toBe(0);
+    expect(send).toHaveBeenCalledTimes(3);
+    expect(a.alert).toHaveBeenCalledTimes(1);
+  });
+
+  it("lease: second run inside 10 minutes claims 0; after 11 minutes the row returns (at-least-once)", async () => {
+    const c = clock();
+    // mark fails, so the row stays leased after the send (a crash after send).
+    const { db } = leasedDb(row(), c, { markFails: true });
+    const send = vi.fn().mockResolvedValue(undefined);
+    const deps = { db, senders: { in_app: { send } }, alerter: alerter() };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect((await runDueReminders(deps)).claimed).toBe(1);
+    c.t += 5 * 60_000;
+    expect((await runDueReminders(deps)).claimed).toBe(0);
+    expect(send).toHaveBeenCalledTimes(1);
+    c.t += 6 * 60_000;
+    expect((await runDueReminders(deps)).claimed).toBe(1);
+    expect(send).toHaveBeenCalledTimes(2);
+    vi.restoreAllMocks();
+  });
+});

@@ -74,7 +74,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           )}
         </Link>
       </nav>
-      <main id="main" className="mx-auto max-w-5xl px-4 py-12 md:px-6 lg:px-8">
+      <main
+        id="main"
+        tabIndex={-1}
+        className="outline-none mx-auto max-w-5xl px-4 py-12 md:px-6 lg:px-8"
+      >
         {children}
       </main>
       <footer className="mx-auto max-w-5xl px-4 py-8 text-sm text-muted-foreground md:px-6 lg:px-8">

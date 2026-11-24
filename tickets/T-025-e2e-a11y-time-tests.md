@@ -1,7 +1,7 @@
 ﻿---
 id: T-025
 title: End-to-end tests, axe pass, scheduler time tests
-status: PLANNING
+status: BUILDING
 milestone: MVP
 ui: false
 depends_on: []  # all MVP tickets except T-024 (POST_MVP)

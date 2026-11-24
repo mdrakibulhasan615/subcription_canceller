@@ -147,7 +147,9 @@ export function ImportForm({ action }: { action: Action }) {
                 aria-busy={pending}
               >
                 {pending && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-                {pending ? "Importing..." : `Import ${preview.counts.valid} subscriptions`}
+                {pending
+                  ? "Importing..."
+                  : `Import ${preview.counts.valid} ${preview.counts.valid === 1 ? "subscription" : "subscriptions"}`}
               </Button>
             </div>
           </>

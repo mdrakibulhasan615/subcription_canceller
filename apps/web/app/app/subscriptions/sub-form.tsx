@@ -52,9 +52,9 @@ function Field(props: {
       })}
       {hasHelp &&
         (props.live ? (
-          <p id={`${name}-help`} aria-live="polite" className="text-sm text-muted-foreground">
+          <div id={`${name}-help`} aria-live="polite" className="text-sm text-muted-foreground">
             {help}
-          </p>
+          </div>
         ) : (
           <div id={`${name}-help`} className="text-sm text-muted-foreground">
             {help}
@@ -274,6 +274,7 @@ export function SubForm({
 
       <Field
         name="stop_date"
+        live
         error={fieldErrors.stop_date}
         help={
           <>

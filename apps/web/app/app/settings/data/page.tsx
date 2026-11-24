@@ -17,12 +17,13 @@ export default function DataPage() {
         </h2>
         <p className="mt-3">
           Download a copy of the data we hold about you. JSON has everything. CSV has your
-          subscriptions only (opens in Excel and Sheets). We do not include anonymous usage events
-          or other people&apos;s data.
+          subscriptions only (opens in Excel and Sheets). We do not include usage events or other
+          people&apos;s data.
         </p>
         <p className="mt-3 text-sm text-muted-foreground">
-          Not in the file: anonymous usage events (we cannot list them for you), guide reports (not
-          linked to you), your waitlist entry, and push keys (secrets; we export the endpoint only).
+          Not in the file: usage events (linked to your user id, but the app cannot read them back),
+          guide reports (not linked to you), your waitlist entry, and push keys (secrets; we export
+          the endpoint only).
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <a href="/api/export/json" download className={link}>

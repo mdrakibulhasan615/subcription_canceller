@@ -29,5 +29,6 @@ minimumReleaseAgeExclude:
   - "@sentry/server-runtime-injection@11.17.0"
   - "@sentry/server-utils@11.17.0"
   - "@sentry/vercel-edge@11.17.0"
+  - "@axe-core/playwright@4.14.1"
 allowBuilds:
   esbuild: false

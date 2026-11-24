@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { CircleAlert, Loader2 } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import type { ActionResult } from "../form-utils";
@@ -85,6 +85,15 @@ export function ReminderActions({
   const [confirming, setConfirming] = useState(false);
   const [date, setDate] = useState("");
   const trigger = useRef<HTMLButtonElement>(null);
+  const undo = useRef<HTMLButtonElement>(null);
+  const focusUndo = useRef(false);
+  // The confirm box is gone after "Yes". Send focus to Undo once the stopped text shows.
+  useEffect(() => {
+    if (stoppedText && focusUndo.current) {
+      focusUndo.current = false;
+      undo.current?.focus();
+    }
+  }, [stoppedText]);
   const base = stopDate && stopDate > today ? stopDate : today;
   const tooLate = (n: number) => !renewal || addDays(base, n) > renewal;
   const closeConfirm = () => {
@@ -107,9 +116,11 @@ export function ReminderActions({
         <div className="flex flex-wrap items-center gap-3">
           <p>{stoppedText}</p>
           <Button
+            ref={undo}
             type="button"
             variant="outline"
             disabled={pending}
+            aria-label="Undo marked as stopped"
             onClick={() => run(() => unmarkStoppedAction(id), "Stopped mark removed.")}
           >
             <Spin on={pending} />
@@ -138,7 +149,10 @@ export function ReminderActions({
                 run(
                   () => markStoppedAction(id),
                   "Marked as stopped. Reminders are off.",
-                  () => setConfirming(false),
+                  () => {
+                    focusUndo.current = true;
+                    setConfirming(false);
+                  },
                 )
               }
             >
@@ -240,6 +254,7 @@ export function MerchantControl({
           variant="outline"
           disabled={pending}
           className={wrap}
+          aria-label={cancelledText ? "Undo marked as cancelled with merchant" : undefined}
           onClick={() =>
             cancelledText
               ? run(() => unmarkCancelledAction(id), "Merchant mark removed.")

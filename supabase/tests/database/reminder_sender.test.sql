@@ -70,6 +70,16 @@ select is(public.mark_reminder_result('00000000-0000-0000-0000-000000000001', 'r
 select is((select attempts from public.reminders where id = '00000000-0000-0000-0000-000000000001'), 0,
   'late mark does not change attempts');
 
+-- A second mark sent keeps sent_at and provider_ref.
+update public.reminders set sent_at = now() - interval '1 hour', provider_ref = 'ref-1'
+  where id = '00000000-0000-0000-0000-000000000001';
+select is(public.mark_reminder_result('00000000-0000-0000-0000-000000000001', 'sent', null, 'ref-2'), 'sent',
+  'second mark sent returns sent');
+select results_eq(
+  $q$select provider_ref, sent_at < now() - interval '30 minutes' from public.reminders where id = '00000000-0000-0000-0000-000000000001'$q$,
+  $q$values ('ref-1'::text, true)$q$,
+  'second mark sent leaves provider_ref and sent_at unchanged');
+
 -- Criteria 5: retry backoff and failure.
 select is(public.mark_reminder_result('00000000-0000-0000-0000-000000000002', 'retry', 'x'), 'pending', 'first retry stays pending');
 select results_eq(

@@ -3,7 +3,17 @@ import tseslint from "typescript-eslint";
 import next from "eslint-config-next";
 
 const config = [
-  { ignores: ["**/node_modules/**", "**/.next/**", "**/next-env.d.ts", "pnpm-lock.yaml"] },
+  {
+    ignores: [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/next-env.d.ts",
+      "pnpm-lock.yaml",
+      "playwright-report/**",
+      "test-results/**",
+      "e2e/.auth/**",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...next,
