@@ -1,0 +1,31 @@
+{
+  "kind": "cancel",
+  "service_slug": "disney-plus",
+  "title": "Disney+",
+  "steps": [
+    {
+      "text": "Sign in to Disney+ in a web browser."
+    },
+    {
+      "text": "Open the profile menu and choose Account."
+    },
+    {
+      "text": "Choose your subscription under Subscription."
+    },
+    {
+      "text": "Choose Cancel Subscription.",
+      "note": "The page differs by country and plan. If you do not see this option, a partner may bill you."
+    },
+    {
+      "text": "Follow the prompts and confirm.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    },
+    {
+      "text": "If a partner bills you, cancel with that partner.",
+      "note": "If you pay through Apple, Google or a mobile carrier, cancel there. See the Apple App Store or Google Play guide."
+    }
+  ],
+  "url": "https://www.disneyplus.com/account",
+  "source_url": "https://help.disneyplus.com/article/disneyplus-en-us-cancel-subscription",
+  "last_checked_at": null
+}

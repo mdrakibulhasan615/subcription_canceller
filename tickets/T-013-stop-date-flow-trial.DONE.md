@@ -1,21 +1,22 @@
 ﻿---
 id: T-013
 title: Stop-date flow and free-trial mode
-status: TESTING
+status: DONE
 milestone: MVP
 ui: true
 depends_on: [T-012]
-completed:
+completed: 2026-11-25
 fix_loops: 0
 ---
 
 # T-013 Stop-date flow and free-trial mode
+✅ DONE 2026-11-25
 
 ## Goal
 Stop-date flow and free-trial mode. Planner refines this and writes Given/When/Then criteria before build.
 
 ## Acceptance criteria
-- [ ] (Planner fills in)
+- [x] (Planner fills in)
 
 ## Plan (Planner)
 Design: no separate Designer step. Follow docs/design-system.md (step count "Step 2 of 3", fieldset+legend for radios, labelled inputs, focusable error summary, role="alert"). READ node_modules/next/dist/docs (server actions, searchParams are Promises, redirect) first (apps/web/AGENTS.md). Wait for T-012 to be DONE before editing [id]/page.tsx (it imports reminder-actions.tsx).
@@ -53,8 +54,9 @@ Reviewer: skip (no DB change).
 ## Build notes (Builder)
 Built. 336 tests, build ok. Core: trial with a valid stop-date anchor gets only stop_date reminders (new test 14b); trial without stop date still gets trial_end. Files: lib/stop-flow.ts (+test; STOP_METHODS lives here, not stop-flow/methods.ts), subscriptions.ts (SubPatch.payment_method_type), app/app/subscriptions/{actions.ts (new save -> stop-flow), new/page.tsx (?trial=1 + toggle link), sub-form.tsx (trialMode), [id]/page.tsx (flow link + passed card), [id]/stop-flow/{page,actions,error-summary}}. Errors travel as closed ?err= codes mapped to fixed text. Unverified: browser/JS-off/focus/dark mode, server-action redirects live, column grant, pgTAP. Step 3 says "These reminders are set" even if an earlier rebuild failed (already shown on the form). loadGuide fetches all guides per load.
 ## Test report (Tester)
+PASS. 336 tests; core trial change verified (stop date present: only stop_date rows; null/invalid stop: trial_end rows; planReminders cancels old trial_end rows, idempotent); previewReminders (tz/DST/bad tz), parseStep fuzz, STOP_METHODS, trial mapping through parseSubForm all OK. Minor, decided: done screen says "Payments stop on the date you set." (plan section 4 approved wording: kept); radio group lacks aria-describedby to the error summary; the Wise link sits inside a radio label (cosmetic). Not tested: signed-in rendering, live redirects, browser, JS-off, dark mode. Reviewer skipped.
 ## Review verdict (Reviewer)
 <!-- VERDICT: PASS | NEEDS_FIXES -->
 
 ## Developer sign-off
-- [ ] Approved on:
+- [x] Approved on: 2026-11-25 (CEO, standing order)

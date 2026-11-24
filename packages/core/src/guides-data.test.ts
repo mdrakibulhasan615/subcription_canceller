@@ -12,6 +12,11 @@ describe("guides-data", () => {
     expect(Object.keys(GUIDE_FILES).sort()).toEqual([...files].sort());
   });
 
+  it("has 8 cancel, 2 store and 1 provider guides", () => {
+    const n = (k: string) => files.filter((f) => f.startsWith(`${k}--`)).length;
+    expect([n("cancel"), n("store"), n("provider")]).toEqual([8, 2, 1]);
+  });
+
   it.each(files)("%s is a valid guide", (f) => {
     const g = guideSchema.parse(GUIDE_FILES[f]);
     expect(f).toBe(`${g.kind}--${g.service_slug}.json`);

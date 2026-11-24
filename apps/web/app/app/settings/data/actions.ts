@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { deleteAccount, type DeleteResult } from "../../../../lib/account";
+import { authTimeFromAmr, deleteAccount, type DeleteResult } from "../../../../lib/account";
 import { rateLimit } from "../../../../lib/rate-limit";
 import { createAdminClient } from "../../../../lib/supabase/admin";
 import { createClient, getClaims } from "../../../../lib/supabase/server";
@@ -20,7 +20,7 @@ export async function deleteAccountAction(_prev: DeleteState, fd: FormData): Pro
       ? {
           id: claims.sub,
           email: typeof claims.email === "string" ? claims.email : null,
-          iat: typeof claims.iat === "number" ? claims.iat : undefined,
+          authTime: authTimeFromAmr(claims.amr),
         }
       : null;
 
@@ -34,9 +34,8 @@ export async function deleteAccountAction(_prev: DeleteState, fd: FormData): Pro
         getUser: () => user,
         admin: {
           deleteWaitlistByEmail: async (email) => {
-            // ilike with escaped wildcards = case-insensitive exact match.
-            const exact = email.replace(/[\\%_]/g, "\\$&");
-            return admin().from("waitlist").delete().ilike("email", exact);
+            // Exact match only. The waitlist route stores lowercase emails.
+            return admin().from("waitlist").delete().eq("email", email);
           },
           deleteUser: async (id) => admin().auth.admin.deleteUser(id),
         },

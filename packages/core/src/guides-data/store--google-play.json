@@ -1,0 +1,35 @@
+{
+  "kind": "store",
+  "service_slug": "google-play",
+  "title": "Google Play",
+  "steps": [
+    {
+      "text": "Open the Google Play Store app. Make sure you use the Google account that paid."
+    },
+    {
+      "text": "Tap your profile picture, then Payments & subscriptions."
+    },
+    {
+      "text": "Tap Subscriptions."
+    },
+    {
+      "text": "Tap the subscription you want to stop."
+    },
+    {
+      "text": "Tap Cancel subscription and follow the prompts.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    },
+    {
+      "text": "Or sign in on the web at the Google Play subscriptions page.",
+      "link": "https://play.google.com/store/account/subscriptions",
+      "note": "Use the same Google account that paid."
+    },
+    {
+      "text": "A third party, including StopDate, cannot cancel a Google Play subscription for you.",
+      "note": "Only you can do this with your Google account."
+    }
+  ],
+  "url": "https://play.google.com/store/account/subscriptions",
+  "source_url": "https://support.google.com/googleplay/answer/7018481",
+  "last_checked_at": null
+}

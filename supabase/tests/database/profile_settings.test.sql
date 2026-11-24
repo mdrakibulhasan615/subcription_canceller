@@ -47,5 +47,13 @@ select throws_ok($q$update public.profiles set email = 'x@example.com' where id 
 select throws_ok($q$update public.profiles set id = gen_random_uuid() where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'$q$,
   '42501', null, 'id update denied');
 
+-- D6: onboarded_at (T-019).
+select lives_ok($q$update public.profiles set onboarded_at = now() where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'$q$,
+  'A sets own onboarded_at');
+with u as (update public.profiles set onboarded_at = now() where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' returning 1)
+select is((select count(*)::int from u), 0, 'A cannot update B onboarded_at');
+select throws_ok($q$update public.profiles set created_at = now() where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'$q$,
+  '42501', null, 'created_at update still denied');
+
 select * from finish();
 rollback;

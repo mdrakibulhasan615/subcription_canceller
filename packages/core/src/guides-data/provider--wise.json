@@ -1,0 +1,32 @@
+{
+  "kind": "provider",
+  "service_slug": "wise",
+  "title": "Wise",
+  "steps": [
+    {
+      "text": "Open the Wise app or website and sign in."
+    },
+    {
+      "text": "To make a card for a subscription, open Cards and choose Get a card or Add a card.",
+      "note": "Card types and fees differ by country. Wise shows the options for your account."
+    },
+    {
+      "text": "To pause a card, open Cards and choose the card."
+    },
+    {
+      "text": "Choose Freeze card.",
+      "note": "The names can change. You can unfreeze the card later."
+    },
+    {
+      "text": "To delete a card, choose the card, then Card settings, then Delete card.",
+      "note": "Some deletions cannot be undone."
+    },
+    {
+      "text": "Cancel the subscription with the merchant first.",
+      "note": "Freezing or deleting a card does not cancel the subscription. The merchant can still try to charge you, and you can owe money."
+    }
+  ],
+  "url": "https://wise.com/help",
+  "source_url": "https://wise.com/help",
+  "last_checked_at": null
+}

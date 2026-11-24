@@ -1,0 +1,29 @@
+{
+  "kind": "cancel",
+  "service_slug": "amazon-prime",
+  "title": "Amazon Prime",
+  "steps": [
+    {
+      "text": "Sign in to your Amazon account in a web browser.",
+      "note": "Use the Amazon site for your country. The link on this page is for amazon.com."
+    },
+    {
+      "text": "Open Account & Lists, then Prime Membership."
+    },
+    {
+      "text": "Choose Manage Membership.",
+      "note": "The names can change."
+    },
+    {
+      "text": "Choose End Membership.",
+      "note": "Amazon can show an offer first. Read it before you continue."
+    },
+    {
+      "text": "Follow the prompts and confirm.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    }
+  ],
+  "url": "https://www.amazon.com/mc",
+  "source_url": "https://www.amazon.com/gp/help/customer/display.html?nodeId=GTJQ7QZY7QL2HK46",
+  "last_checked_at": null
+}

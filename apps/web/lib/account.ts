@@ -5,8 +5,8 @@ export type DeleteResult =
   { status: "ok" } | { status: "error"; code: DeleteCode; message: string };
 
 export type DeleteDeps = {
-  /** From verified claims. iat is in seconds. */
-  getUser(): { id: string; email: string | null; iat?: number } | null;
+  /** From verified claims. authTime is the last sign-in time in seconds (max amr timestamp). */
+  getUser(): { id: string; email: string | null; authTime?: number } | null;
   admin: {
     deleteWaitlistByEmail(email: string): Promise<{ error: unknown }>;
     deleteUser(id: string): Promise<{ error: { message?: string; code?: string } | null }>;
@@ -48,7 +48,7 @@ export async function deleteAccount(
   }
 
   const nowSec = Math.floor((deps.now?.() ?? Date.now()) / 1000);
-  if (typeof user.iat !== "number" || nowSec - user.iat > RECENT_SESSION_SEC) {
+  if (typeof user.authTime !== "number" || nowSec - user.authTime > RECENT_SESSION_SEC) {
     return fail("recent", "Sign in again, then retry.");
   }
 
@@ -69,4 +69,13 @@ export async function deleteAccount(
     // The user is gone. A failed sign-out only leaves a dead cookie.
   }
   return { status: "ok" };
+}
+
+/** Last sign-in time (seconds) from the amr claim. iat is the token refresh time: not usable. */
+export function authTimeFromAmr(amr: unknown): number | undefined {
+  if (!Array.isArray(amr)) return undefined;
+  const ts = amr.flatMap((e) =>
+    typeof e === "object" && e !== null && typeof e.timestamp === "number" ? [e.timestamp] : [],
+  );
+  return ts.length ? Math.max(...ts) : undefined;
 }

@@ -1,0 +1,28 @@
+{
+  "kind": "cancel",
+  "service_slug": "spotify",
+  "title": "Spotify",
+  "steps": [
+    {
+      "text": "Sign in to your Spotify account in a web browser.",
+      "note": "Some apps cannot cancel Premium. Use a browser."
+    },
+    {
+      "text": "Open Account, then Manage your plan."
+    },
+    {
+      "text": "Choose Cancel Premium."
+    },
+    {
+      "text": "Follow the prompts and confirm.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    },
+    {
+      "text": "Check your email for a confirmation from Spotify.",
+      "note": "If you pay through a partner or a mobile carrier, cancel with them. If you pay through Apple, Google or a mobile carrier, cancel there. See the Apple App Store or Google Play guide."
+    }
+  ],
+  "url": "https://www.spotify.com/account/subscription/",
+  "source_url": "https://support.spotify.com/article/cancel-premium/",
+  "last_checked_at": null
+}

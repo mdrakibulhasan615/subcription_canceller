@@ -12,6 +12,7 @@ import {
 } from "../../lib/dashboard";
 import { formatDate } from "../../lib/sub-view";
 import { createSubDb, userIdFrom } from "../../lib/subscriptions";
+import { Nudge } from "./nudge";
 import { StatusBadge } from "./subscriptions/status-badge";
 
 export const metadata = { title: "Dashboard" };
@@ -191,6 +192,7 @@ export default async function Dashboard() {
       ) : (
         <>
           {v.counted === 0 ? <AddCta text="No active subscriptions." /> : <Counted v={v} />}
+          <Nudge n={v.counted} />
           <Savings v={v} />
           {v.counted > 0 && <Categories v={v} />}
           <p className="mt-12 max-w-prose text-sm text-muted-foreground">{HONEST_NOTE}</p>

@@ -1,0 +1,28 @@
+{
+  "kind": "cancel",
+  "service_slug": "youtube-premium",
+  "title": "YouTube Premium",
+  "steps": [
+    {
+      "text": "Sign in to YouTube in a web browser.",
+      "note": "If you subscribed in the iPhone app, you pay through Apple. Cancel there. See the Apple App Store guide."
+    },
+    {
+      "text": "Open your profile picture, then Purchases and memberships."
+    },
+    {
+      "text": "Choose Manage membership next to YouTube Premium."
+    },
+    {
+      "text": "Choose Deactivate, then Continue to cancel.",
+      "note": "The names can change. Look for Cancel membership or Deactivate."
+    },
+    {
+      "text": "Follow the prompts and confirm.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    }
+  ],
+  "url": "https://www.youtube.com/paid_memberships",
+  "source_url": "https://support.google.com/youtube/answer/6308278",
+  "last_checked_at": null
+}

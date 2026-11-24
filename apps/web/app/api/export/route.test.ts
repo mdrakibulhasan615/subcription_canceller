@@ -9,11 +9,15 @@ const client = {
   from: (table: string) => ({
     select: () => ({
       eq: (col: string, v: string) => ({
-        limit: async () => {
-          queries.push({ table, col, v });
-          if (table === failTable) return { data: null, error: { message: "x" } };
-          return { data: Array.from({ length: rowCount }, () => ({ name: "N" })), error: null };
-        },
+        order: () => ({
+          range: async (from: number, to: number) => {
+            queries.push({ table, col, v });
+            if (table === failTable) return { data: null, error: { message: "x" } };
+            // Serve rowCount rows in pages, like PostgREST with max_rows 1000.
+            const n = Math.max(0, Math.min(to + 1, rowCount) - from);
+            return { data: Array.from({ length: n }, () => ({ name: "N" })), error: null };
+          },
+        }),
       }),
     }),
   }),
@@ -72,6 +76,14 @@ describe("export routes", () => {
     expect(Number(res.headers.get("retry-after"))).toBeGreaterThan(0);
   });
 
+  it("8b. a full first page triggers a second request", async () => {
+    rowCount = 1000;
+    const res = await getJson();
+    expect(res.status).toBe(200);
+    expect(queries.filter((q) => q.table === "subscriptions")).toHaveLength(2);
+    expect((await res.json()).subscriptions).toHaveLength(1000);
+  });
+
   it("8. query error and row cap give 500 with no file", async () => {
     failTable = "reminders";
     let res = await getJson();
@@ -82,5 +94,6 @@ describe("export routes", () => {
     res = await getCsv();
     expect(res.status).toBe(500);
     expect(res.headers.get("content-disposition")).toBeNull();
+    expect(await res.json()).toEqual({ error: expect.stringContaining("too large") });
   });
 });

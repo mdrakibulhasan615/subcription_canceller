@@ -1,0 +1,31 @@
+{
+  "kind": "cancel",
+  "service_slug": "adobe-creative-cloud",
+  "title": "Adobe Creative Cloud",
+  "steps": [
+    {
+      "text": "Sign in to your Adobe account in a web browser."
+    },
+    {
+      "text": "Open Plans."
+    },
+    {
+      "text": "Choose Manage plan next to your plan."
+    },
+    {
+      "text": "Choose Cancel your plan.",
+      "note": "Annual plans can have a fee if you cancel early. Read the terms Adobe shows before you confirm."
+    },
+    {
+      "text": "Follow the prompts and confirm.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    },
+    {
+      "text": "Check your email for a confirmation from Adobe.",
+      "note": "If you bought through a reseller or a work account, ask them. A team admin cancels team plans."
+    }
+  ],
+  "url": "https://account.adobe.com/plans",
+  "source_url": "https://helpx.adobe.com/manage-account/using/cancel-subscription.html",
+  "last_checked_at": null
+}

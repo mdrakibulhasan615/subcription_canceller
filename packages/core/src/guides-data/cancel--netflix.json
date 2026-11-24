@@ -3,11 +3,23 @@
   "service_slug": "netflix",
   "title": "Netflix",
   "steps": [
-    { "text": "DRAFT, not checked yet. Sign in to Netflix in a web browser." },
-    { "text": "Open your profile menu and choose Account." },
     {
-      "text": "Under Membership and billing, choose Cancel membership and follow the prompts.",
-      "note": "Check the end date Netflix shows. Payments stop on the date you set."
+      "text": "Sign in to Netflix in a web browser."
+    },
+    {
+      "text": "Open the profile menu and choose Account."
+    },
+    {
+      "text": "Under Membership, choose Cancel membership.",
+      "note": "The names can change. Look for Membership and billing."
+    },
+    {
+      "text": "Follow the prompts and confirm.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    },
+    {
+      "text": "Check your email for a confirmation from Netflix.",
+      "note": "If you pay through a partner, Apple, Google or a mobile carrier, cancel there. See the Apple App Store or Google Play guide."
     }
   ],
   "url": "https://www.netflix.com/cancelplan",

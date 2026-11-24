@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { deleteAccount, type DeleteDeps } from "./account";
+import { authTimeFromAmr, deleteAccount, type DeleteDeps } from "./account";
 
 const NOW = 1_800_000_000_000;
 let calls: string[];
 let deps: DeleteDeps;
-let user: { id: string; email: string | null; iat?: number } | null;
+let user: { id: string; email: string | null; authTime?: number } | null;
 let limit: { ok: boolean; retryAfterSec: number };
 let wlErr: unknown;
 let delErr: { message?: string; code?: string } | null;
@@ -13,7 +13,7 @@ const good = { confirm: "DELETE", email: " A@Example.com " };
 
 beforeEach(() => {
   calls = [];
-  user = { id: "u1", email: "a@example.com", iat: NOW / 1000 - 60 };
+  user = { id: "u1", email: "a@example.com", authTime: NOW / 1000 - 60 };
   limit = { ok: true, retryAfterSec: 0 };
   wlErr = null;
   delErr = null;
@@ -92,13 +92,25 @@ describe("deleteAccount", () => {
   });
 
   it("18. old session and null email", async () => {
-    user = { id: "u1", email: "a@example.com", iat: NOW / 1000 - 16 * 60 };
+    user = { id: "u1", email: "a@example.com", authTime: NOW / 1000 - 16 * 60 };
     expect(code(await deleteAccount(deps, good))).toBe("recent");
     user = { id: "u1", email: "a@example.com" };
     expect(code(await deleteAccount(deps, good))).toBe("recent");
-    user = { id: "u1", email: null, iat: NOW / 1000 };
+    user = { id: "u1", email: null, authTime: NOW / 1000 };
     expect(code(await deleteAccount(deps, good))).toBe("no_email");
     expect(calls).not.toContain("waitlist");
+  });
+
+  it("18b. authTime is the newest amr timestamp", () => {
+    expect(
+      authTimeFromAmr([
+        { method: "otp", timestamp: 5 },
+        { method: "x", timestamp: 9 },
+      ]),
+    ).toBe(9);
+    expect(authTimeFromAmr(["otp"])).toBeUndefined();
+    expect(authTimeFromAmr(undefined)).toBeUndefined();
+    expect(authTimeFromAmr([])).toBeUndefined();
   });
 
   it("3. no user: auth error, nothing called", async () => {

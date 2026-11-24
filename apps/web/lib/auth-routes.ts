@@ -1,4 +1,10 @@
 export const DEFAULT_AFTER_SIGN_IN = "/app";
+export const ONBOARDING_PATH = "/app/onboarding";
+
+/** First sign-in with no deep link goes to onboarding. Anything else keeps its target. */
+export function postSignInPath(next: string, onboardedAt: string | null | undefined): string {
+  return next === DEFAULT_AFTER_SIGN_IN && onboardedAt == null ? ONBOARDING_PATH : next;
+}
 
 const MAX_LEN = 200;
 // Control chars, space, DEL, backslash.

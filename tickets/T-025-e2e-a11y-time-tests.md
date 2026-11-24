@@ -4,7 +4,7 @@ title: End-to-end tests, axe pass, scheduler time tests
 status: BACKLOG
 milestone: MVP
 ui: false
-depends_on: []  # all MVP tickets
+depends_on: []  # all MVP tickets except T-024 (POST_MVP)
 completed:
 fix_loops: 0
 ---

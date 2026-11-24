@@ -2,10 +2,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const exchangeCodeForSession = vi.fn();
 const signOut = vi.fn();
+const maybeSingle = vi.fn();
+const isNull = vi.fn();
+const update = vi.fn();
+const from = vi.fn(() => ({
+  select: () => ({ eq: () => ({ maybeSingle }) }),
+  update: (v: unknown) => {
+    update(v);
+    return { eq: () => ({ is: isNull }) };
+  },
+}));
 vi.mock("../../lib/supabase/server", () => ({
-  createClient: async () => ({ auth: { exchangeCodeForSession, signOut } }),
+  createClient: async () => ({ auth: { exchangeCodeForSession, signOut }, from }),
 }));
 
+import { postSignInPath, safeNext } from "../../lib/auth-routes";
 import * as callback from "./callback/route";
 import * as signout from "./signout/route";
 
@@ -14,6 +25,60 @@ const get = (qs: string) => callback.GET(new Request(`http://localhost:3000/auth
 beforeEach(() => {
   exchangeCodeForSession.mockReset().mockResolvedValue({ error: null });
   signOut.mockReset().mockResolvedValue({ error: null });
+  maybeSingle.mockReset().mockResolvedValue({ data: { onboarded_at: null }, error: null });
+  isNull.mockReset().mockResolvedValue({ error: null });
+  update.mockReset();
+});
+
+describe("postSignInPath", () => {
+  it("T-019 1-4. onboarding only for a bare /app and a null flag", () => {
+    expect(postSignInPath("/app", null)).toBe("/app/onboarding");
+    expect(postSignInPath("/app", undefined)).toBe("/app/onboarding");
+    expect(postSignInPath("/app", "2026-01-01T00:00:00Z")).toBe("/app");
+    expect(postSignInPath("/app/subscriptions/new", null)).toBe("/app/subscriptions/new");
+    for (const bad of ["//evil.com", "/app\\x", "https://evil.com"]) {
+      expect(postSignInPath(safeNext(bad), null)).toBe("/app/onboarding");
+    }
+  });
+});
+
+describe("callback onboarding", () => {
+  const withUser = () =>
+    exchangeCodeForSession.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+  const loc = async (qs: string) => (await get(qs)).headers.get("location");
+
+  it("1. new user goes to onboarding and the flag is set", async () => {
+    withUser();
+    expect(await loc("?code=abc&next=/app")).toBe("http://localhost:3000/app/onboarding");
+    expect(update).toHaveBeenCalledOnce();
+    expect(update.mock.calls[0]?.[0]).toHaveProperty("onboarded_at");
+  });
+
+  it("2. onboarded user goes to /app", async () => {
+    withUser();
+    maybeSingle.mockResolvedValue({ data: { onboarded_at: "2026-01-01T00:00:00Z" }, error: null });
+    expect(await loc("?code=abc&next=/app")).toBe("http://localhost:3000/app");
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("3. a deep link skips onboarding and leaves the flag", async () => {
+    withUser();
+    expect(await loc("?code=abc&next=/app/subscriptions/new")).toBe(
+      "http://localhost:3000/app/subscriptions/new",
+    );
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("5. select or update failure goes to /app", async () => {
+    withUser();
+    maybeSingle.mockResolvedValue({ data: null, error: new Error("x") });
+    expect(await loc("?code=abc")).toBe("http://localhost:3000/app");
+    maybeSingle.mockRejectedValue(new Error("boom"));
+    expect(await loc("?code=abc")).toBe("http://localhost:3000/app");
+    maybeSingle.mockResolvedValue({ data: { onboarded_at: null }, error: null });
+    isNull.mockResolvedValue({ error: new Error("x") });
+    expect(await loc("?code=abc")).toBe("http://localhost:3000/app");
+  });
 });
 
 describe("callback GET", () => {

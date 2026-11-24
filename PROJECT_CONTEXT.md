@@ -9,7 +9,7 @@ StopDate (code name) is a privacy-first subscription manager. The user adds a su
 ## MVP
 Mode A only (user-managed card). Epics E1 to E7 from the plan, with these changes:
 - IN: auth, profile, subscription CRUD, stop-date and reminder engine (in-app + email), dashboard, CSV import, free-trial mode, 10 guides, Wise provider guide, Apple/Google store guides, landing + waitlist, analytics, card-interest question, data export, account delete, template legal pages, tests.
-- Web push: last E3 ticket. May slip to POST_MVP.
+- Web push: POST_MVP (decided 2026-11-25).
 - OUT (POST_MVP): "paste a list" import, Privacy and Capital One provider guides, guides 11 to 50, email forwarding, ICS, extension, managed cards, assisted cancel, billing, mobile apps, Malaysia.
 - Never: bank linking, bill negotiation, budgeting.
 - Exit: all MVP tickets DONE. 20 real users for 30 days (the developer recruits them). Metrics in plan section 17 measured.
@@ -62,19 +62,19 @@ T-009 | Reminder sender + pg_cron | DONE | - | pgTAP verified in CI; do not enab
 T-010 | Safety sweep | DONE | - | CI verified; needs GH secrets; T-011 must pass p_ref
 T-011 | Email + in-app notices (ui) | DONE | - | CI verified; go-live checklist in supabase/README.md
 T-012 | Reminder actions (ui) | DONE | - | polish: focus after mark stopped, Undo aria-labels
-T-013 | Stop-date flow + trial mode (ui) | BUILDING | builder | core change for trials
+T-013 | Stop-date flow + trial mode (ui) | DONE | - | trial: only stop_date reminders when a stop date exists
 T-014 | Guides core (ui) | DONE | - | CI verified; guides-data/index.ts needs one line per guide; run seed:guides before launch
-T-015 | Wise + store guides (ui) | BUILDING | builder | drafts, last_checked_at null
-T-016 | Guides content (8 cancel) | BUILDING | builder | drafts, developer must verify
+T-015 | Wise + store guides | DONE (draft) | - | developer must verify (docs/guides-verification.md)
+T-016 | Guides content (8 cancel) | DONE (draft) | - | developer must verify; then pnpm seed:guides
 T-017 | Dashboard (ui) | DONE | - | nav + brand link added
 T-018 | CSV import (ui) | DONE | - | polish batch: name echo, copy, plural
-T-019 | Onboarding (ui) | BACKLOG | - | dep T-013
+T-019 | Onboarding (ui) | BUILDING | builder | migration 000008; step order changed (reminders before add-sub)
 T-020 | Landing + waitlist (ui) | DONE | - | Tailwind+shadcn base; 77 tests
 T-021 | Analytics + card question (ui) | BACKLOG | - | dep T-019
 T-022 | Sentry + legal pages (ui) | DONE | - | placeholder contact email; T-021 updates analytics line
-T-023 | Export + account delete (ui) | BUILDING | builder | Reviewer required
-T-024 | Web push (may slip) | BACKLOG | - | dep T-011
-T-025 | E2E, axe, time tests | BACKLOG | - | dep all MVP
+T-023 | Export + account delete (ui) | DONE | - | manual: amr claim, live delete; SERVICE_ROLE_KEY on Vercel
+T-024 | Web push | POST_MVP | - | decided 2026-11-25; spec in the ticket
+T-025 | E2E, axe, time tests | BACKLOG | - | dep all MVP except T-024
 
 ## Open Questions / Risks
 - Standing order (developer, 2026-11-24): run T-001 to T-025 without check-ins. CEO approves. Reviewer only when needed (security, DB, scheduler, risky). Ask developer only if blocked.

@@ -1,0 +1,31 @@
+{
+  "kind": "cancel",
+  "service_slug": "microsoft-365",
+  "title": "Microsoft 365",
+  "steps": [
+    {
+      "text": "Sign in to your Microsoft account in a web browser."
+    },
+    {
+      "text": "Open Services & subscriptions."
+    },
+    {
+      "text": "Find Microsoft 365 and choose Manage."
+    },
+    {
+      "text": "Choose Cancel subscription.",
+      "note": "The names can change. Look for Cancel or Turn off recurring billing."
+    },
+    {
+      "text": "Follow the prompts and confirm.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    },
+    {
+      "text": "Check your email for a confirmation from Microsoft.",
+      "note": "If you bought through a store or a work account, cancel there. If you pay through Apple, Google or a mobile carrier, cancel there. See the Apple App Store or Google Play guide."
+    }
+  ],
+  "url": "https://account.microsoft.com/services",
+  "source_url": "https://support.microsoft.com/en-us/microsoft-365",
+  "last_checked_at": null
+}

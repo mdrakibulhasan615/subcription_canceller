@@ -1,0 +1,35 @@
+{
+  "kind": "store",
+  "service_slug": "apple-app-store",
+  "title": "Apple App Store",
+  "steps": [
+    {
+      "text": "On iPhone or iPad, open Settings and tap your name."
+    },
+    {
+      "text": "Tap Subscriptions."
+    },
+    {
+      "text": "Tap the subscription you want to stop."
+    },
+    {
+      "text": "Tap Cancel Subscription and confirm.",
+      "note": "If you do not see Cancel, the subscription is already stopped or another party bills it."
+    },
+    {
+      "text": "On a Mac, open the App Store app, click your name, then Account Settings. Click Manage next to Subscriptions."
+    },
+    {
+      "text": "Or use the Apple page for subscriptions on the web and sign in with your Apple Account.",
+      "link": "https://support.apple.com/en-us/118428",
+      "note": "Apple changes this page. Search Apple Support for cancel a subscription if you cannot find it."
+    },
+    {
+      "text": "A third party, including StopDate, cannot cancel an Apple subscription for you.",
+      "note": "Only you can do this with your Apple Account."
+    }
+  ],
+  "url": "https://support.apple.com/billing",
+  "source_url": "https://support.apple.com/en-us/118428",
+  "last_checked_at": null
+}

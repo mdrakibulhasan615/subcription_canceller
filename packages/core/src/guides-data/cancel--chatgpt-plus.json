@@ -1,0 +1,28 @@
+{
+  "kind": "cancel",
+  "service_slug": "chatgpt-plus",
+  "title": "ChatGPT Plus",
+  "steps": [
+    {
+      "text": "Sign in to ChatGPT in a web browser."
+    },
+    {
+      "text": "Open your profile menu and choose My plan or Settings."
+    },
+    {
+      "text": "Choose Manage subscription.",
+      "note": "The names can change."
+    },
+    {
+      "text": "Choose Cancel subscription and follow the prompts.",
+      "note": "Check the end date the service shows. Payments stop on the date you set."
+    },
+    {
+      "text": "Check your email for a confirmation.",
+      "note": "If you subscribed in the iPhone app, cancel in your Apple subscriptions. See the Apple App Store guide."
+    }
+  ],
+  "url": "https://chatgpt.com",
+  "source_url": "https://help.openai.com/en/articles/7232927-how-do-i-cancel-my-subscription-for-chatgpt-plus-or-chatgpt-pro",
+  "last_checked_at": null
+}
