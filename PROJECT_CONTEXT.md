@@ -77,6 +77,7 @@ T-024 | Web push | POST_MVP | - | decided 2026-11-25; spec in the ticket
 T-025 | Time tests, public axe, manual QA, CI e2e smoke | DONE | - | e2e smoke green on first CI run (36 tests)
 
 ## Open Questions / Risks
+- MVP COMPLETE 2026-11-25 (T-001..T-025 DONE; T-024 POST_MVP). Waiting for the developer: change the MVP, or start POST_MVP. Status page: docs/mvp-status.md. Developer must do the go-live checklist (section 3) before the 20-user run.
 - Standing order (developer, 2026-11-24): run T-001 to T-025 without check-ins. CEO approves. Reviewer only when needed (security, DB, scheduler, risky). Ask developer only if blocked.
 - CI is live on GitHub (main): workflows CI and DB both green on first push (2026-11-24). Edge Function index.ts (Deno) is still untested.
 - Dev actions later: GitHub secrets SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, FOUNDER_ALERT_EMAIL for the sweep workflow.  Supabase project + Google OAuth client + custom SMTP (see README, T-003).  create a GitHub remote so CI can run.

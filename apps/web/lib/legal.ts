@@ -1,6 +1,6 @@
 export type LegalSection = { heading: string; paragraphs: string[]; bullets?: string[] };
 
-export const LEGAL_UPDATED = "2026-11-26";
+export const LEGAL_UPDATED = "2026-11-25";
 // TODO(go-live): set NEXT_PUBLIC_CONTACT_EMAIL to a real inbox (go-live checklist).
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@example.com";
 export const LEGAL_BANNER = "Template text. Not yet reviewed by a lawyer.";
