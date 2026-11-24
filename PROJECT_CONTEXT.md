@@ -15,7 +15,7 @@ Mode A only (user-managed card). Epics E1 to E7 from the plan, with these change
 - Exit: all MVP tickets DONE. 20 real users for 30 days (the developer recruits them). Metrics in plan section 17 measured.
 
 ## Stack & Constraints
-- Stack: TypeScript, Next.js (App Router, PWA), Tailwind, shadcn/ui, Supabase (Auth, Postgres, RLS, Edge Functions, pg_cron), Zod, Vitest, Playwright, pgTAP, Resend (email), Umami (analytics), Sentry (free), Vercel (host), GitHub, pnpm monorepo.
+- Stack: TypeScript, Next.js (App Router, PWA), Tailwind, shadcn/ui, Supabase (Auth, Postgres, RLS, Edge Functions, pg_cron), Zod, Vitest, Playwright, pgTAP, Resend (email), first-party events table + SQL metrics (no Umami), Sentry (free), Vercel (host), GitHub, pnpm monorepo.
 - Layout: `/apps/web`, `/packages/core` (all business logic), `/supabase`.
 - Constraints: free tiers only. Self-funded founder in Malaysia. Mobile first. WCAG AA. Plain language. Honest copy (plan section 4).
 
@@ -27,7 +27,7 @@ Mode A only (user-managed card). Epics E1 to E7 from the plan, with these change
 - D5: Reminders at 7, 3, 1 days before stop date. Sent at 09:00 user local time (changeable). Stored as UTC fire_at. Recompute on timezone change.
 - D6: Channels: in-app and email first. Web push last, may slip.
 - D7: 10 cancel guides at MVP: Netflix, Spotify, YouTube Premium, Disney+, Amazon Prime, Adobe CC, Microsoft 365, ChatGPT Plus, Apple App Store, Google Play. Guides are data rows. Builder drafts from public help pages. Developer verifies. Each guide has source link, "last checked" date, "report a problem" button. Wise is the only provider guide.
-- D8: Free MVP. Umami for analytics (final check in E6 ticket). Sentry free tier. Email alert to founder when a reminder reaches `failed`.
+- D8: Free MVP. Analytics = first-party events table + SQL metric queries (no third party, no cookies; decided 2026-11-25; Umami may come POST_MVP). Sentry free tier. Email alert to founder when a reminder reaches `failed`.
 - D9: CSV import only.
 - D10: Template privacy and terms pages in MVP. Legal review before public launch (post-MVP gate).
 - D11: Brand name stays "StopDate" in one config constant until the developer picks a name.
@@ -68,13 +68,13 @@ T-015 | Wise + store guides | DONE (draft) | - | developer must verify (docs/gui
 T-016 | Guides content (8 cancel) | DONE (draft) | - | developer must verify; then pnpm seed:guides
 T-017 | Dashboard (ui) | DONE | - | nav + brand link added
 T-018 | CSV import (ui) | DONE | - | polish batch: name echo, copy, plural
-T-019 | Onboarding (ui) | BUILDING | builder | migration 000008; step order changed (reminders before add-sub)
+T-019 | Onboarding (ui) | DONE | - | CI verified; one-shot flag; step order changed
 T-020 | Landing + waitlist (ui) | DONE | - | Tailwind+shadcn base; 77 tests
-T-021 | Analytics + card question (ui) | BACKLOG | - | dep T-019
+T-021 | Events + metrics SQL + card question (ui) | BUILDING | builder | Reviewer required; migration 000009
 T-022 | Sentry + legal pages (ui) | DONE | - | placeholder contact email; T-021 updates analytics line
 T-023 | Export + account delete (ui) | DONE | - | manual: amr claim, live delete; SERVICE_ROLE_KEY on Vercel
 T-024 | Web push | POST_MVP | - | decided 2026-11-25; spec in the ticket
-T-025 | E2E, axe, time tests | BACKLOG | - | dep all MVP except T-024
+T-025 | Time tests + public axe + manual QA (T-025a); e2e smoke CI (T-025b) | PLANNED | - | after T-021; extended e2e POST_MVP
 
 ## Open Questions / Risks
 - Standing order (developer, 2026-11-24): run T-001 to T-025 without check-ins. CEO approves. Reviewer only when needed (security, DB, scheduler, risky). Ask developer only if blocked.

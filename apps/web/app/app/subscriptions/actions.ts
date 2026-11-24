@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { PAYMENT_TYPES } from "../../../lib/events";
 import { createClient, getClaims } from "../../../lib/supabase/server";
+import { track } from "../../../lib/track";
 import {
   archiveSubscription,
   createSubDb,
@@ -37,18 +39,24 @@ export async function saveSub(
   const hidden = formData.get("sub_id");
   const target = id ?? (isUuid(hidden) ? hidden : null);
   let result: SubResult;
+  let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
   try {
-    result = await saveSubscription(
-      createSubDb(await createClient()),
-      userId,
-      target,
-      formData,
-      new Date(),
-    );
+    supabase = await createClient();
+    result = await saveSubscription(createSubDb(supabase), userId, target, formData, new Date());
   } catch {
     result = { ok: false, error: "server" };
   }
   revalidatePath(LIST);
+  if (result.ok && id === null) {
+    const pay = formData.get("payment_method_type");
+    // The form always sets a stop date (a blank input gets the default).
+    track(supabase, userId, "subscription_added", {
+      has_stop_date: true,
+      is_trial: formData.get("is_trial") === "on",
+      payment_method_type: (PAYMENT_TYPES as readonly unknown[]).includes(pay) ? pay : "none",
+      source: "form",
+    });
+  }
   // Outside try/catch: redirect works by throwing. A new save starts the stop-date flow.
   if (result.ok) redirect(id === null ? `${LIST}/${result.id}/stop-flow` : LIST);
   return toState(result, target ?? undefined);

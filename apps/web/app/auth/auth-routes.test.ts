@@ -12,6 +12,8 @@ const from = vi.fn(() => ({
     return { eq: () => ({ is: isNull }) };
   },
 }));
+const track = vi.fn();
+vi.mock("../../lib/track", () => ({ track: (...a: unknown[]) => track(...a) }));
 vi.mock("../../lib/supabase/server", () => ({
   createClient: async () => ({ auth: { exchangeCodeForSession, signOut }, from }),
 }));
@@ -28,6 +30,7 @@ beforeEach(() => {
   maybeSingle.mockReset().mockResolvedValue({ data: { onboarded_at: null }, error: null });
   isNull.mockReset().mockResolvedValue({ error: null });
   update.mockReset();
+  track.mockReset();
 });
 
 describe("postSignInPath", () => {
@@ -52,6 +55,8 @@ describe("callback onboarding", () => {
     expect(await loc("?code=abc&next=/app")).toBe("http://localhost:3000/app/onboarding");
     expect(update).toHaveBeenCalledOnce();
     expect(update.mock.calls[0]?.[0]).toHaveProperty("onboarded_at");
+    expect(track).toHaveBeenCalledOnce();
+    expect(track.mock.calls[0]?.slice(1)).toEqual(["u1", "signed_in_first"]);
   });
 
   it("2. onboarded user goes to /app", async () => {
@@ -59,6 +64,7 @@ describe("callback onboarding", () => {
     maybeSingle.mockResolvedValue({ data: { onboarded_at: "2026-01-01T00:00:00Z" }, error: null });
     expect(await loc("?code=abc&next=/app")).toBe("http://localhost:3000/app");
     expect(update).not.toHaveBeenCalled();
+    expect(track).not.toHaveBeenCalled();
   });
 
   it("3. a deep link skips onboarding and leaves the flag", async () => {
@@ -78,6 +84,7 @@ describe("callback onboarding", () => {
     maybeSingle.mockResolvedValue({ data: { onboarded_at: null }, error: null });
     isNull.mockResolvedValue({ error: new Error("x") });
     expect(await loc("?code=abc")).toBe("http://localhost:3000/app");
+    expect(track).not.toHaveBeenCalled();
   });
 });
 

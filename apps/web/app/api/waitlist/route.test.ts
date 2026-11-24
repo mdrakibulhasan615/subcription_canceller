@@ -4,6 +4,9 @@ const insert = vi.fn();
 const from = vi.fn(() => ({ insert }));
 vi.mock("@supabase/supabase-js", () => ({ createClient: () => ({ from }) }));
 
+const track = vi.fn();
+vi.mock("../../../lib/track", () => ({ track: (...a: unknown[]) => track(...a) }));
+
 import { POST } from "./route";
 import { _resetRateLimit } from "../../../lib/rate-limit";
 
@@ -20,6 +23,7 @@ beforeEach(() => {
   _resetRateLimit();
   insert.mockReset().mockResolvedValue({ error: null });
   from.mockClear();
+  track.mockReset();
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://localhost");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon");
 });
@@ -32,6 +36,8 @@ describe("POST /api/waitlist", () => {
     expect(from).toHaveBeenCalledWith("waitlist");
     expect(insert).toHaveBeenCalledTimes(1);
     expect(insert).toHaveBeenCalledWith({ email: "a@b.com", source: "landing" });
+    expect(track).toHaveBeenCalledOnce();
+    expect(track.mock.calls[0]?.slice(1)).toEqual([null, "waitlist_joined"]);
   });
 
   it("2. duplicate returns the same 200", async () => {
@@ -39,6 +45,7 @@ describe("POST /api/waitlist", () => {
     const res = await POST(req({ email: "a@b.com" }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
+    expect(track).not.toHaveBeenCalled();
   });
 
   it("3. other error returns 500 with no error text", async () => {
@@ -48,6 +55,7 @@ describe("POST /api/waitlist", () => {
     const text = await res.text();
     expect(JSON.parse(text)).toEqual({ ok: false, error: "server" });
     expect(text).not.toContain("secret");
+    expect(track).not.toHaveBeenCalled();
   });
 
   it("4. bad emails return 400 and skip insert", async () => {

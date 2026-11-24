@@ -12,6 +12,8 @@ import {
 } from "../../lib/dashboard";
 import { formatDate } from "../../lib/sub-view";
 import { createSubDb, userIdFrom } from "../../lib/subscriptions";
+import { hasAnswered, type FeedbackDb } from "../../lib/card-interest";
+import { CardInterest } from "./card-interest";
 import { Nudge } from "./nudge";
 import { StatusBadge } from "./subscriptions/status-badge";
 
@@ -177,9 +179,17 @@ function Categories({ v }: { v: DashboardView }) {
 
 export default async function Dashboard() {
   const userId = userIdFrom(await getClaims());
-  const v = userId
-    ? await loadDashboard(createSubDb(await createClient()), userId, new Date())
-    : "error";
+  const supabase = userId ? await createClient() : null;
+  const v =
+    userId && supabase ? await loadDashboard(createSubDb(supabase), userId, new Date()) : "error";
+  // A read error shows no card.
+  const ask =
+    userId && supabase && v !== "error" && v.total > 0
+      ? await hasAnswered(supabase as unknown as FeedbackDb, userId).then(
+          (a) => !a,
+          () => false,
+        )
+      : false;
   return (
     <>
       <h1 className="text-[32px] leading-[38px] md:text-5xl md:leading-[52px]">Dashboard</h1>
@@ -192,6 +202,7 @@ export default async function Dashboard() {
       ) : (
         <>
           {v.counted === 0 ? <AddCta text="No active subscriptions." /> : <Counted v={v} />}
+          {ask && <CardInterest />}
           <Nudge n={v.counted} />
           <Savings v={v} />
           {v.counted > 0 && <Categories v={v} />}

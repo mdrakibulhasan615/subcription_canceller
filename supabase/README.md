@@ -41,3 +41,7 @@ Migration 000007 reopens rows that failed with "email not configured" in the las
 ## Account delete (T-023) service role key
 
 Account delete needs `SUPABASE_SERVICE_ROLE_KEY`. In Vercel: Project Settings > Environment Variables, add `SUPABASE_SERVICE_ROLE_KEY` (Production, Sensitive). Never use a `NEXT_PUBLIC_` name. `SUPABASE_URL` is optional: the app reuses `NEXT_PUBLIC_SUPABASE_URL`. For local work, put the key in `apps/web/.env.local` (git-ignored by `.env.*`). Without the key, delete fails with a server error and removes nothing.
+
+## Metrics (T-021)
+
+The five MVP metrics are plain SQL in `supabase/metrics/`. Definitions, targets and caveats: `docs/metrics.md`.

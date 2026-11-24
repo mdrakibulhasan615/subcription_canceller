@@ -5,6 +5,7 @@ import { authTimeFromAmr, deleteAccount, type DeleteResult } from "../../../../l
 import { rateLimit } from "../../../../lib/rate-limit";
 import { createAdminClient } from "../../../../lib/supabase/admin";
 import { createClient, getClaims } from "../../../../lib/supabase/server";
+import { track } from "../../../../lib/track";
 
 export type DeleteState = { status: "idle" } | Extract<DeleteResult, { status: "error" }>;
 
@@ -51,6 +52,14 @@ export async function deleteAccountAction(_prev: DeleteState, fd: FormData): Pro
       message: "Something went wrong. Your account may not be deleted. Try again.",
     };
   }
-  if (result.status === "ok") redirect("/goodbye");
+  if (result.status === "ok") {
+    // No user id: the account is gone. The session is already signed out.
+    try {
+      track(await createClient(), null, "account_deleted");
+    } catch {
+      // The event is optional.
+    }
+    redirect("/goodbye");
+  }
   return result;
 }

@@ -1,4 +1,5 @@
 import { clientIp, rateLimit } from "../../../lib/rate-limit";
+import { track } from "../../../lib/track";
 import { getAnonClient, joinWaitlist, waitlistSchema } from "../../../lib/waitlist";
 
 function json(body: object, status = 200, headers?: Record<string, string>) {
@@ -25,7 +26,9 @@ export async function POST(req: Request) {
   const parsed = waitlistSchema.safeParse(body);
   if (!parsed.success) return json({ ok: false, error: "invalid_email" }, 400);
   try {
-    await joinWaitlist(getAnonClient(), parsed.data.email, parsed.data.source);
+    const anon = getAnonClient();
+    const r = await joinWaitlist(anon, parsed.data.email, parsed.data.source);
+    if (r === "ok") track(anon, null, "waitlist_joined");
     return json({ ok: true });
   } catch {
     return json({ ok: false, error: "server" }, 500);

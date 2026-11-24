@@ -1,7 +1,7 @@
 ﻿---
 id: T-021
-title: Umami analytics, event tracking, card-interest question
-status: BACKLOG
+title: First-party event tracking, metrics SQL and card-interest question (no Umami)
+status: REVIEWING
 milestone: MVP
 ui: true
 depends_on: [T-019]
@@ -9,7 +9,7 @@ completed:
 fix_loops: 0
 ---
 
-# T-021 Umami analytics, event tracking, card-interest question
+# T-021 First-party event tracking, metrics SQL and card-interest question (no Umami)
 
 ## Goal
 Umami analytics, event tracking, card-interest question. Planner refines this and writes Given/When/Then criteria before build.
@@ -18,6 +18,32 @@ Umami analytics, event tracking, card-interest question. Planner refines this an
 - [ ] (Planner fills in)
 
 ## Plan (Planner)
+Design: no separate Designer step. Follow docs/design-system.md. READ node_modules/next/dist/docs (server actions, after()) first (apps/web/AGENTS.md).
+DECISION (CEO accepted, D8 updated): option (a): first-party `events` table only. NO Umami in MVP (no third party, no cookies, no new subprocessor; page views measure none of the five metrics; Umami can come POST_MVP). Four of five metrics come from existing tables; only retention needs events.
+Metric definitions: Activation = share of profiles created in the cohort with >= 3 rows in subscriptions (caveat: deleted subscriptions are not counted); Stop dates = share of subscriptions with stop_date not null; Reminder value = users with >= 1 subscription with stop_confirmed_at or merchant_cancelled_at not null / users with >= 1 reminder sent (a PROXY, not proven caused by a reminder: document; events subscription_stop_confirmed and merchant_cancelled_marked are only a cross-check); Card interest = feedback key 'auto_close_interest': yes / all answers (also show maybe and no counts); Retention (week 4) = users with an app_opened event in days 22-28 after profiles.created_at / users who signed up at least 28 days ago (deleted users have user_id null and drop out: survivor bias; at 20 users numbers are noisy: say so).
+Add:
+- supabase/migrations/20261124000009_analytics.sql: (1) create unique index feedback_user_key_uq on public.feedback (user_id, key); (2) create unique index events_app_opened_daily_uq on public.events (user_id, ((created_at at time zone 'UTC')::date)) where name = 'app_opened' and user_id is not null; grants and policies unchanged; no functions. Re-read carefully (expression index syntax; immutability of the expression).
+- supabase/tests/database/analytics.test.sql (pgTAP): anon insert with user_id null works; anon insert with a user_id fails; authenticated insert for another user's id fails; authenticated select on events returns 0 rows or is denied; props >= 4096 bytes fails; second app_opened on the same UTC day fails 23505 and a different day works; feedback duplicate (user_id,key) fails; another user's feedback not visible. Existing account_delete_cascade covers events keeping user_id null.
+- apps/web/lib/events.ts (+test): EVENT_NAMES = signed_in_first, onboarding_completed, onboarding_skipped, subscription_added, subscription_stop_confirmed, merchant_cancelled_marked, stop_date_extended, csv_imported, export_downloaded, account_deleted, waitlist_joined, app_opened. Props schemas (zod .strict(), only enums, booleans, small ints, NEVER email, name, price, card, notes): subscription_added {has_stop_date:boolean, is_trial:boolean, payment_method_type:enum(core list), source:"form"|"csv"}; csv_imported {count:int 0..500}; export_downloaded {format:"json"|"csv"}; all others {}. trackEvent(client, userId|null, name, props?): Promise<void> NEVER throws/rejects: parse props with the schema for that name (parse failure or insert error swallowed; optional console.warn of the NAME only, never props); use the user-JWT client (createClient()), NO service role (keep lib/supabase/admin-scan.test.ts green); never block the user action (use Next after() or void + catch); userId null for anon and account_deleted (no identifier added). A test asserts docs/metrics.md lists exactly EVENT_NAMES.
+- Call sites (only on success; failures send nothing): auth/callback/route.ts: signed_in_first only when onboarded_at was null and this call set it (the one-shot update); onboarding steps.ts/actions.ts: onboarding_completed / onboarding_skipped; app/app/subscriptions/actions.ts: subscription_added (source form) on create; import/actions.ts: ONE csv_imported {count} (no per-row subscription_added); [id]/actions.ts: subscription_stop_confirmed (markStopped), merchant_cancelled_marked, stop_date_extended (not the unmark actions); stop-flow/actions.ts if it extends the date: stop_date_extended; api/export/{json,csv}/route.ts: export_downloaded {format}; settings/data/actions.ts: account_deleted (user_id null, no identifier); api/waitlist/route.ts: waitlist_joined (anon client, user_id null); app/app/layout.tsx: app_opened after claims (a duplicate on the same UTC day fails on the unique index and is ignored; add a `shortcut:` comment: one cheap failed insert per navigation; upgrade to a sampled call if load grows). Skipped on purpose: reminder_notification_opened, guide_viewed, Umami/page views, a settings UI to change the card answer, a pnpm metrics script, metrics DB functions.
+- Card-interest question: apps/web/lib/card-interest.ts (+test): ANSWERS ["yes","maybe","no"], saveInterest(db,userId,answer) inserts feedback(key='auto_close_interest', value) (23505 = already answered = ok), hasAnswered(db,userId); apps/web/app/app/card-interest.tsx (client, form) + card-interest-actions.ts (server action answerCardInterest(formData) -> {ok:true}|{ok:false,message}; unauthenticated -> "Sign in to answer."; invalid value -> message, no insert). Dashboard (app/app/page.tsx): when the user has not answered and has >= 1 subscription, render the card under the totals (dashboard load error -> no card). UI: fieldset with legend "Would you want the card to close automatically?", three buttons Yes / Not sure / No (min-h-11), text "We are testing whether this would be useful. Nothing is charged or created.", a "Not now" button that hides it only for this render (client state; shows again next visit until answered); after an answer show "Thanks, saved." in an aria-live="polite" region and move focus there, then hide the card. Answer is final (no settings UI).
+- Privacy text (lib/legal.ts + legal.test.ts; bump LEGAL_UPDATED): replace the analytics paragraph with "We do not use third-party analytics. We count our own events in our database: what you did (for example, you added a subscription) and the day you opened the app. We store no prices, names, notes, or card details in events. We use no cookies for this. Events are linked to your user id. When you delete your account, we remove the user id and keep the rows." Keep the literal phrase "no cookies and no ad trackers" (an existing test needs it). Add to the retention section: events with no user id stay for statistics. Check apps/web/app/app/settings/data/page.tsx copy matches. Update legal.test.ts with keys "third-party analytics", "day you opened the app", "remove the user id"; keep the banned-phrase test green (no "cancelled", no "guarantee"). Remove the now-wrong "Umami"/"planned" wording anywhere (grep).
+- supabase/metrics/{activation,stop_dates,reminder_value,card_interest,retention}.sql (plain SQL for the Supabase SQL editor; each has a header comment with the definition and target (activation 50%, stop dates 40%, reminder value 30%, card interest 40%, retention 25%) and prints one row: numerator, denominator, percent) and docs/metrics.md (definitions, targets, caveats, event list, how to run). One line in supabase/README.md pointing to docs/metrics.md. Optional small pgTAP supabase/tests/database/metrics_sql.test.sql seeding a few users to check one query's output (skip if it makes the ticket too large).
+Edge cases: insert failure/RLS denial swallowed; bad props dropped; duplicate app_opened (23505) ignored; duplicate feedback answer (double click) -> ok:true; tracking must not run on prerender; trackEvent takes the client so tests use fakes.
+Criteria:
+1. Anon or authenticated client inserts an event with a valid name+props: row exists; anon with a user_id, authenticated with another user_id, props >= 4096 bytes, and any select all fail (pgTAP).
+2. User already has app_opened today (UTC): re-render creates no second row, page renders normally.
+3. trackEvent with invalid props (e.g. {email:"a@b.c"}) or a client that rejects/throws: resolves, inserts nothing for invalid props, caller continues (Vitest).
+4. Each action in the mapping: on success exactly one event with the right name and props (fake client); on failure none (Vitest per action).
+5. No answer + >= 1 subscription: dashboard shows legend, three buttons and the honest text; pressing Yes stores one feedback row ('auto_close_interest','yes'), card gone after reload; second press creates no second row (pgTAP unique index + Vitest).
+6. "Not now" stores nothing; card shows again next visit.
+7. Privacy page states first-party events, no third-party analytics, no cookies for analytics, delete behaviour; legal.test.ts passes (new keys + banned phrases).
+8. The five SQL files return numerator/denominator/percent on seed data; docs/metrics.md lists each definition, target and caveat; the event list in docs matches EVENT_NAMES (test).
+9. A11y: card keyboard operable, focus goes to the live message after an answer, buttons >= 44px, fieldset+legend.
+10. typecheck, lint, test, format:check, build pass; the DB workflow runs the new pgTAP file.
+Tests (Vitest, fakes: {from:()=>({insert:vi.fn()})}, same pattern as import/actions.test.ts and settings/data/actions.test.ts): trackEvent, each schema, saveInterest, answerCardInterest, each action's event, docs-vs-EVENT_NAMES drift, legal test, card render via renderToStaticMarkup (see status-badge.test.ts). pgTAP in the DB workflow.
+Reviewer: YES (privacy + DB: no event can carry personal data; no select path to events for clients).
+
 ## Design (Designer)
 ## Build notes (Builder)
 ## Test report (Tester)

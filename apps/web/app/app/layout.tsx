@@ -6,12 +6,16 @@ import { LegalLinks } from "../../components/legal-links";
 import { Button } from "../../components/ui/button";
 import { createClient, getClaims } from "../../lib/supabase/server";
 import { formatBadge, unreadCount } from "../../lib/notifications";
+import { track } from "../../lib/track";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const claims = await getClaims();
   // The proxy is not the only gate.
   if (!claims) redirect("/sign-in?next=%2Fapp");
-  const unread = await unreadCount(await createClient());
+  const supabase = await createClient();
+  // shortcut: one cheap failed insert per navigation (the unique index drops the repeat of the day); upgrade to a sampled call if load grows.
+  if (typeof claims.sub === "string") track(supabase, claims.sub, "app_opened");
+  const unread = await unreadCount(supabase);
   return (
     <>
       <a

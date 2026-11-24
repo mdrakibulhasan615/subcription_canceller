@@ -84,6 +84,19 @@ describe("onboarding steps", () => {
     expect(r.to).toBe("/app/onboarding?step=2&err=reminder_days");
   });
 
+  it("sends onboarding_completed only when step 2 saves", async () => {
+    const seen: string[] = [];
+    const t = fakeDb();
+    const now = new Date("2026-06-01T00:00:00Z");
+    const f2 = fd({ default_stop_days_before: "5", reminder_days: "7, 3, 1", reminder_hour: "8" });
+    await runStep(t.db, "u", 1, fd({ timezone: "UTC", currency: "USD" }), now, (n) => seen.push(n));
+    expect(seen).toEqual([]);
+    await runStep(t.db, "u", 2, fd({ reminder_days: "7;3" }), now, (n) => seen.push(n));
+    expect(seen).toEqual([]);
+    await runStep(t.db, "u", 2, f2, now, (n) => seen.push(n));
+    expect(seen).toEqual(["onboarding_completed"]);
+  });
+
   it("no profile or a throwing db gives err=server", async () => {
     expect((await run(1, {}, null)).to).toBe("/app/onboarding?step=1&err=server");
     const { db } = fakeDb();

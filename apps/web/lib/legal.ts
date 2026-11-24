@@ -1,6 +1,6 @@
 export type LegalSection = { heading: string; paragraphs: string[]; bullets?: string[] };
 
-export const LEGAL_UPDATED = "2026-11-25";
+export const LEGAL_UPDATED = "2026-11-26";
 // TODO(go-live): set NEXT_PUBLIC_CONTACT_EMAIL to a real inbox (go-live checklist).
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@example.com";
 export const LEGAL_BANNER = "Template text. Not yet reviewed by a lawyer.";
@@ -36,8 +36,8 @@ export const PRIVACY: LegalSection[] = [
   {
     heading: "Cookies and analytics",
     paragraphs: [
-      "We use one kind of cookie: the sign-in session cookie. We use no ad cookies and no ad trackers.",
-      "Analytics are planned and will stay limited. They will use no cookies and no ad trackers. We will update this page when analytics go live.",
+      "We use one kind of cookie: the sign-in session cookie. We use no cookies and no ad trackers for anything else.",
+      "We do not use third-party analytics. We count our own events in our database: what you did (for example, you added a subscription) and the day you opened the app. We store no prices, names, notes, or card details in events. We use no cookies for this. Events are linked to your user id. When you delete your account, we remove the user id and keep the rows.",
     ],
   },
   {
@@ -60,7 +60,7 @@ export const PRIVACY: LegalSection[] = [
   {
     heading: "How long we keep data",
     paragraphs: [
-      "We keep your data while your account exists. Guide problem reports stay until we review them. We remove a waitlist email when you ask us by email.",
+      "We keep your data while your account exists. Guide problem reports stay until we review them. Events with no user id stay for statistics. We remove a waitlist email when you ask us by email.",
     ],
   },
   {

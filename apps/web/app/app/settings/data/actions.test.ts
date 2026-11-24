@@ -5,6 +5,8 @@ const EMAIL = "*%_" + BS + "@example.com";
 const eq = vi.fn();
 const ilike = vi.fn();
 const deleteUser = vi.fn();
+const track = vi.fn();
+vi.mock("../../../../lib/track", () => ({ track: (...a: unknown[]) => track(...a) }));
 vi.mock("server-only", () => ({}));
 vi.mock("next/navigation", () => ({
   redirect: () => {
@@ -32,6 +34,7 @@ beforeEach(() => {
   eq.mockReset().mockResolvedValue({ error: null });
   ilike.mockReset();
   deleteUser.mockReset().mockResolvedValue({ error: null });
+  track.mockReset();
 });
 
 describe("deleteAccountAction", () => {
@@ -43,5 +46,17 @@ describe("deleteAccountAction", () => {
     expect(eq).toHaveBeenCalledWith("email", EMAIL);
     expect(ilike).not.toHaveBeenCalled();
     expect(deleteUser).toHaveBeenCalledWith("u1");
+    expect(track).toHaveBeenCalledOnce();
+    expect(track.mock.calls[0]?.slice(1)).toEqual([null, "account_deleted"]);
+  });
+
+  it("sends no event when the delete fails", async () => {
+    deleteUser.mockResolvedValue({ error: { message: "x" } });
+    eq.mockResolvedValue({ error: null });
+    const fd = new FormData();
+    fd.set("confirm", "DELETE");
+    fd.set("email", EMAIL);
+    await deleteAccountAction({ status: "idle" }, fd).catch(() => {});
+    expect(track).not.toHaveBeenCalled();
   });
 });

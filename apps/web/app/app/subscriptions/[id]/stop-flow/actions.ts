@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { createClient, getClaims } from "../../../../../lib/supabase/server";
+import { track } from "../../../../../lib/track";
 import { extendError, setStopMethod, type StepError } from "../../../../../lib/stop-flow";
 import { extendStopDate, type ExtendResult } from "../../../../../lib/sub-actions";
 import { createSubDb, isUuid, userIdFrom } from "../../../../../lib/subscriptions";
@@ -26,13 +27,15 @@ export async function stopDateStepAction(id: string, formData: FormData): Promis
   const d = formData.get("stop_date");
   let r: ExtendResult;
   try {
+    const supabase = await createClient();
     r = await extendStopDate(
-      createSubDb(await createClient()),
+      createSubDb(supabase),
       userId,
       id,
       typeof d === "string" ? d.trim() : "",
       new Date(),
     );
+    if (r.ok) track(supabase, userId, "stop_date_extended");
   } catch {
     r = { ok: false, error: "server" };
   }

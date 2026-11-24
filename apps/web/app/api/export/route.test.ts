@@ -22,6 +22,8 @@ const client = {
     }),
   }),
 };
+const track = vi.fn();
+vi.mock("../../../lib/track", () => ({ track: (...a: unknown[]) => track(...a) }));
 vi.mock("../../../lib/supabase/server", () => ({
   createClient: async () => client,
   getClaims: async () => claims,
@@ -37,6 +39,7 @@ beforeEach(() => {
   failTable = null;
   rowCount = 0;
   claims = { sub: "A" };
+  track.mockReset();
 });
 
 describe("export routes", () => {
@@ -61,6 +64,20 @@ describe("export routes", () => {
     expect((await getJson()).status).toBe(401);
     expect((await getCsv()).status).toBe(401);
     expect(queries).toHaveLength(0);
+    expect(track).not.toHaveBeenCalled();
+  });
+
+  it("sends one export_downloaded event per success", async () => {
+    await getJson();
+    await getCsv();
+    expect(track.mock.calls.map((c) => c.slice(1))).toEqual([
+      ["A", "export_downloaded", { format: "json" }],
+      ["A", "export_downloaded", { format: "csv" }],
+    ]);
+    failTable = "profiles";
+    track.mockReset();
+    expect((await getJson()).status).toBe(500);
+    expect(track).not.toHaveBeenCalled();
   });
 
   it("csv: content type and header", async () => {

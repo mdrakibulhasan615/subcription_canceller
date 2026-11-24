@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ONBOARDING_PATH, postSignInPath, safeNext } from "../../../lib/auth-routes";
 import { createClient } from "../../../lib/supabase/server";
+import { track } from "../../../lib/track";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -41,7 +42,9 @@ async function onboardingTarget(
       .update({ onboarded_at: new Date().toISOString() })
       .eq("id", userId)
       .is("onboarded_at", null);
-    return upd.error ? target : path;
+    if (upd.error) return target;
+    track(supabase, userId, "signed_in_first");
+    return path;
   } catch {
     return target;
   }

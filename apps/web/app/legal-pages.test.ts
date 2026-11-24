@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { routeDecision } from "../lib/auth-routes";
+import { LEGAL_UPDATED } from "../lib/legal";
 import Error from "./error";
 import GlobalError from "./global-error";
 import Privacy from "./privacy/page";
@@ -15,7 +16,7 @@ describe("legal pages", () => {
     it(`${name}: h1, date, banner, contact, footer links`, () => {
       const html = renderToStaticMarkup(createElement(Page));
       expect(html.match(/<h1[ >]/g)).toHaveLength(1);
-      expect(html).toContain("Last updated: 2026-11-25");
+      expect(html).toContain(`Last updated: ${LEGAL_UPDATED}`);
       expect(html).toContain("Template text. Not yet reviewed by a lawyer.");
       expect(html).toContain("contact@example.com");
       expect(html).toContain('href="/privacy"');
