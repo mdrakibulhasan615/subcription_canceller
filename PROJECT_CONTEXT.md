@@ -43,6 +43,7 @@ Mode A only (user-managed card). Epics E1 to E7 from the plan, with these change
 - DB: profiles UPDATE is column-granted; T-004 adds reminder_hour (default 9) and adds it to the grant. No stored subscription status. Reminders: stop date -7/-3/-1 days, renewal -1 day.
 - Design system: docs/design-system.md (tokens, status badges, a11y rules). All UI tickets follow it.
 - Edge Functions do not import core (Deno extension rule). Handler is pure, tested with Vitest fakes. reminders.claimed_until is the lease. Delivery is at-least-once.
+- UI tickets after T-020 skip the Designer: builder follows docs/design-system.md.
 - Scope `@app/*`. Brand only in packages/core/src/brand.ts. Node >=22.12. Pins: TypeScript 6.0.x, ESLint 9.x (peer limits).
 - Build: `pnpm build` (web only).
 
@@ -52,17 +53,17 @@ Roadmap approved 2026-11-24. Ticket files T-001 to T-025 exist in `tickets/`. T-
 T-001 | Monorepo, CI, lint, test setup | DONE | - | CI unproven, no remote
 T-002 | Supabase schema, RLS, RLS tests | DONE | - | pgTAP verified in CI (118 tests)
 T-003 | Auth (ui) | DONE | - | live auth untested; needs Supabase project + Google + SMTP
-T-004 | Profile and settings (ui) | BUILDING | builder | adds reminder_hour migration 000005
+T-004 | Profile and settings (ui) | DONE | - | 132 tests, CI DB verified; see T-012 note
 T-005 | Core: money, dates, cost | DONE | - | 42 tests; zod 4.6.7
-T-006 | Subscription CRUD (ui) | BACKLOG | - | dep T-002,004,005
-T-007 | List, detail, checklist (ui) | BACKLOG | - | dep T-006
+T-006 | Subscription CRUD (ui) | DONE | - | 181 tests; card guard whole-field only
+T-007 | List, detail, checklist (ui) | BUILDING | builder | checklist read-only; T-012 wires actions
 T-008 | Reminder generation (core) | DONE | - | 62 core tests
 T-009 | Reminder sender + pg_cron | DONE | - | pgTAP verified in CI; do not enable prod cron before T-011
 T-010 | Safety sweep | DONE | - | CI verified; needs GH secrets; T-011 must pass p_ref
-T-011 | Email + in-app notices (ui) | BACKLOG | - | dep T-009; add: reopen rows failed "email not configured", cap client-inserted reminder rows
+T-011 | Email + in-app notices (ui) | BUILDING | builder | migration 000007; reviewer required
 T-012 | Reminder actions (ui) | BACKLOG | - | dep T-007,011
 T-013 | Stop-date flow + trial mode (ui) | BACKLOG | - | dep T-012
-T-014 | Guides core (ui) | BACKLOG | - | dep T-002
+T-014 | Guides core (ui) | DONE | - | CI verified; guides-data/index.ts needs one line per guide; run seed:guides before launch
 T-015 | Wise + store guides (ui) | BACKLOG | - | dep T-014
 T-016 | Guides content (10) | BACKLOG | - | dep T-014
 T-017 | Dashboard (ui) | BACKLOG | - | dep T-007

@@ -32,6 +32,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </header>
       <nav aria-label="Main" className="mx-auto max-w-5xl px-4 md:px-6 lg:px-8">
         <Link
+          href="/app/subscriptions"
+          className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium underline-offset-4 hover:underline"
+        >
+          Subscriptions
+        </Link>
+        <Link
           href="/app/settings"
           className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium underline-offset-4 hover:underline"
         >

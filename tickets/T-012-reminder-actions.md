@@ -18,6 +18,7 @@ Snooze, extend, mark stopped, mark cancelled. Planner refines this and writes Gi
 - [ ] (Planner fills in)
 
 ## Plan (Planner)
+CEO NOTE: rebuildReminders (apps/web/lib/profile-settings.ts) reopens status=skipped rows that match the desired set on every save. Do not model a user snooze/skip as status=skipped without a marker, or a later save undoes it. Prefer moving dates (snooze = new fire times via stop_date or a snoozed_until approach) or add a marker column in a new migration.
 ## Design (Designer)
 ## Build notes (Builder)
 ## Test report (Tester)

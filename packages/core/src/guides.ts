@@ -78,7 +78,6 @@ const ALIASES: [string, GuideKind, string][] = [
   ["openai", "cancel", "chatgpt-plus"],
   ["app store", "store", "apple-app-store"],
   ["itunes", "store", "apple-app-store"],
-  ["apple", "store", "apple-app-store"],
   ["google play", "store", "google-play"],
   ["play store", "store", "google-play"],
   ["wise", "provider", "wise"],
