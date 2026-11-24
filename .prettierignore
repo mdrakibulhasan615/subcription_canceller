@@ -1,0 +1,6 @@
+.next
+pnpm-lock.yaml
+*.md
+.claude
+graphify-out
+supabase
