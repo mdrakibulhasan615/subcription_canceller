@@ -8,3 +8,5 @@ export * from "./schema";
 export * from "./reminders";
 export * from "./sweep";
 export * from "./profile";
+export * from "./guides";
+export { GUIDE_FILES } from "./guides-data";

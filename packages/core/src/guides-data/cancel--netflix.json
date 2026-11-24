@@ -1,0 +1,16 @@
+{
+  "kind": "cancel",
+  "service_slug": "netflix",
+  "title": "Netflix",
+  "steps": [
+    { "text": "DRAFT, not checked yet. Sign in to Netflix in a web browser." },
+    { "text": "Open your profile menu and choose Account." },
+    {
+      "text": "Under Membership and billing, choose Cancel membership and follow the prompts.",
+      "note": "Check the end date Netflix shows. Payments stop on the date you set."
+    }
+  ],
+  "url": "https://www.netflix.com/cancelplan",
+  "source_url": "https://help.netflix.com/en/node/407",
+  "last_checked_at": null
+}

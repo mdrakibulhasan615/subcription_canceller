@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "build": "pnpm --filter @app/web build",
-    "sweep": "tsx scripts/safety-sweep.ts"
+    "sweep": "tsx scripts/safety-sweep.ts",
+    "seed:guides": "tsx scripts/seed-guides.ts"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",

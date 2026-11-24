@@ -35,7 +35,7 @@ const str = (fd: FormData, k: string) => {
   return typeof v === "string" ? v : undefined;
 };
 // A blank or bad number becomes NaN, which the schema rejects on that field.
-const num = (v: string | undefined) => (v === undefined || v.trim() === "" ? NaN : Number(v));
+const num = (v: string | undefined) => (v !== undefined && /^\s*\d+\s*$/.test(v) ? Number(v) : NaN);
 
 /** Raw strings as typed, to show again after an error. */
 export function formValues(fd: FormData): Partial<FormValues> {

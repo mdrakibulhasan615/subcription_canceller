@@ -1,5 +1,6 @@
 import { BRAND } from "@app/core";
 import { Info } from "lucide-react";
+import Link from "next/link";
 import { WaitlistForm } from "./waitlist-form";
 
 const STEPS = [
@@ -67,6 +68,10 @@ export default function Page() {
       </main>
       <footer className="mx-auto max-w-5xl px-4 py-8 text-sm text-muted-foreground md:px-6 lg:px-8">
         {BRAND}
+        {" · "}
+        <Link href="/guides" className="inline-flex min-h-11 items-center underline">
+          Cancel guides
+        </Link>
       </footer>
     </>
   );
