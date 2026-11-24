@@ -56,23 +56,23 @@ T-003 | Auth (ui) | DONE | - | live auth untested; needs Supabase project + Goog
 T-004 | Profile and settings (ui) | DONE | - | 132 tests, CI DB verified; see T-012 note
 T-005 | Core: money, dates, cost | DONE | - | 42 tests; zod 4.6.7
 T-006 | Subscription CRUD (ui) | DONE | - | 181 tests; card guard whole-field only
-T-007 | List, detail, checklist (ui) | BUILDING | builder | checklist read-only; T-012 wires actions
+T-007 | List, detail, checklist (ui) | DONE | - | minors fixed in fix batch
 T-008 | Reminder generation (core) | DONE | - | 62 core tests
 T-009 | Reminder sender + pg_cron | DONE | - | pgTAP verified in CI; do not enable prod cron before T-011
 T-010 | Safety sweep | DONE | - | CI verified; needs GH secrets; T-011 must pass p_ref
-T-011 | Email + in-app notices (ui) | BUILDING | builder | migration 000007; reviewer required
-T-012 | Reminder actions (ui) | BACKLOG | - | dep T-007,011
-T-013 | Stop-date flow + trial mode (ui) | BACKLOG | - | dep T-012
+T-011 | Email + in-app notices (ui) | DONE | - | CI verified; go-live checklist in supabase/README.md
+T-012 | Reminder actions (ui) | BUILDING | builder | snooze = move stop date
+T-013 | Stop-date flow + trial mode (ui) | PLANNED | - | core change: trial skips trial_end reminders when a stop date exists; after T-012 tested
 T-014 | Guides core (ui) | DONE | - | CI verified; guides-data/index.ts needs one line per guide; run seed:guides before launch
 T-015 | Wise + store guides (ui) | BACKLOG | - | dep T-014
 T-016 | Guides content (10) | BACKLOG | - | dep T-014
-T-017 | Dashboard (ui) | BACKLOG | - | dep T-007
-T-018 | CSV import (ui) | BACKLOG | - | dep T-006
+T-017 | Dashboard (ui) | DONE | - | nav + brand link added
+T-018 | CSV import (ui) | DONE | - | polish batch: name echo, copy, plural
 T-019 | Onboarding (ui) | BACKLOG | - | dep T-013
 T-020 | Landing + waitlist (ui) | DONE | - | Tailwind+shadcn base; 77 tests
 T-021 | Analytics + card question (ui) | BACKLOG | - | dep T-019
-T-022 | Sentry + legal pages (ui) | BACKLOG | - | dep T-001
-T-023 | Export + account delete (ui) | BACKLOG | - | dep T-004
+T-022 | Sentry + legal pages (ui) | BUILDING | builder | placeholder contact email; template banner
+T-023 | Export + account delete (ui) | PLANNED | - | after T-022; Reviewer required
 T-024 | Web push (may slip) | BACKLOG | - | dep T-011
 T-025 | E2E, axe, time tests | BACKLOG | - | dep all MVP
 

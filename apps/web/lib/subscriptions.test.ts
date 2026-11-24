@@ -115,6 +115,9 @@ function fake(opts: { profile?: ProfileSettings | null; failInserts?: boolean } 
       s.archived_at = at;
       return true;
     },
+    async patchSub() {
+      return false;
+    },
     async deleteSub(userId, id) {
       const s = subs.get(id);
       if (!s || s.user_id !== userId) return false;

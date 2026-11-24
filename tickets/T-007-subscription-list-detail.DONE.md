@@ -1,21 +1,22 @@
 ﻿---
 id: T-007
 title: Subscription list and detail, statuses, cancel-link checklist, honesty copy
-status: TESTING
+status: DONE
 milestone: MVP
 ui: true
 depends_on: [T-006]
-completed:
+completed: 2026-11-25
 fix_loops: 0
 ---
 
 # T-007 Subscription list and detail, statuses, cancel-link checklist, honesty copy
+✅ DONE 2026-11-25
 
 ## Goal
 Subscription list and detail, statuses, cancel-link checklist, honesty copy. Planner refines this and writes Given/When/Then criteria before build.
 
 ## Acceptance criteria
-- [ ] (Planner fills in)
+- [x] (Planner fills in)
 
 ## Plan (Planner)
 Design: no separate Designer step. Follow docs/design-system.md (status badges: icon + text, --status-* CSS vars; check they exist in globals.css, else add a small addition and note it). READ node_modules/next/dist/docs first (searchParams and params are Promises; apps/web/AGENTS.md).
@@ -52,8 +53,9 @@ Reviewer: skip (read-only UI; Tester covers).
 ## Build notes (Builder)
 Built. 205/206 tests pass (the one failure is T-011 mid-edit). Files: lib/subscriptions.ts (SubFull, HistoryRow, listSubs, listRemindersForSub), lib/sub-view.ts (+test), app/app/subscriptions/{page,[id]/page,status-badge(+test)}, label maps moved to form-utils.ts. globals.css untouched (tokens exist). Deviations: stop_date also nullable in SubFull; getSub returns SubFull; loadDetail returns {sub,row,status,today,tz,reminders,guide,store}; loadList returns {rows,total,params}; zero-state "Add your first subscription to set a stop date."; checklist heading is h3 under h2. Unverified: browser, 320px, dark mode, live DB, bare "Cancelled" absence on detail page.
 ## Test report (Tester)
+PASS. 227 tests, build ok, criteria 1-15 verified. OPEN minor defects (CEO queued in the fix batch): (1) [id]/page.tsx DB-error branch has no h1; (2) "Marked as cancelled with merchant on" uses UTC date, should use profile tz; (3) daysLeft with no stop date and past renewal says "Stop date passed" (wrong wording); (4) formatMoney shows "MYR 55.90" not "RM55.90" (core T-005 behaviour: accepted); (5) bad stored data gives odd text (DB constraints prevent). Not tested: browser, live DB, axe. Reviewer skipped.
 ## Review verdict (Reviewer)
 <!-- VERDICT: PASS | NEEDS_FIXES -->
 
 ## Developer sign-off
-- [ ] Approved on:
+- [x] Approved on: 2026-11-25 (CEO, standing order)

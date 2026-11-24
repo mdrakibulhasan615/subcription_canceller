@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BRAND } from "@app/core";
+import { LegalLinks } from "../../components/legal-links";
 import { Button } from "../../components/ui/button";
 import { createClient, getClaims } from "../../lib/supabase/server";
 import { formatBadge, unreadCount } from "../../lib/notifications";
@@ -20,7 +21,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         Skip to main content
       </a>
       <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-6 lg:px-8">
-        <span className="text-lg font-semibold">{BRAND}</span>
+        <Link href="/app" className="text-lg font-semibold">
+          {BRAND}
+        </Link>
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm break-all text-muted-foreground">
             {typeof claims.email === "string" ? claims.email : ""}
@@ -33,6 +36,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
       <nav aria-label="Main" className="mx-auto max-w-5xl px-4 md:px-6 lg:px-8">
+        <Link
+          href="/app"
+          className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium underline-offset-4 hover:underline"
+        >
+          Dashboard
+        </Link>
         <Link
           href="/app/subscriptions"
           className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium underline-offset-4 hover:underline"
@@ -64,6 +73,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <main id="main" className="mx-auto max-w-5xl px-4 py-12 md:px-6 lg:px-8">
         {children}
       </main>
+      <footer className="mx-auto max-w-5xl px-4 py-8 text-sm text-muted-foreground md:px-6 lg:px-8">
+        <LegalLinks />
+      </footer>
     </>
   );
 }

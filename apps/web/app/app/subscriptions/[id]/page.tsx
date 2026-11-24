@@ -12,6 +12,7 @@ import {
 } from "../../../../lib/sub-view";
 import { PAYMENT_LABELS } from "../form-utils";
 import { StatusBadge } from "../status-badge";
+import { MerchantControl, ReminderActions } from "./reminder-actions";
 
 export const metadata = { title: "Subscription" };
 
@@ -106,6 +107,24 @@ export default async function SubscriptionDetailPage({
         </p>
       </section>
 
+      {!sub.archived_at && (
+        <section className="mt-8">
+          <h2 className={h2}>Stop date actions</h2>
+          <ReminderActions
+            id={sub.id}
+            stoppedText={
+              sub.stop_confirmed_at
+                ? `Marked as stopped on ${formatStampDate(sub.stop_confirmed_at, tz)}`
+                : null
+            }
+            cancelled={!!sub.merchant_cancelled_at}
+            stopDate={sub.stop_date}
+            renewal={sub.next_renewal_date}
+            today={v.today}
+          />
+        </section>
+      )}
+
       <section className="mt-8">
         <h2 className={h2}>Cancel with the merchant</h2>
         <p className="mt-2 max-w-prose">Payments stop on the date you set.</p>
@@ -129,12 +148,14 @@ export default async function SubscriptionDetailPage({
           </p>
         )}
         <h3 className="mt-4 text-xl">Did you also cancel with the merchant?</h3>
-        {/* T-012: wire the mark/unmark action here */}
-        <p className="mt-1">
-          {sub.merchant_cancelled_at
-            ? `Marked as cancelled with merchant on ${formatStampDate(sub.merchant_cancelled_at, tz)}`
-            : "Not marked yet"}
-        </p>
+        <MerchantControl
+          id={sub.id}
+          cancelledText={
+            sub.merchant_cancelled_at
+              ? `Marked as cancelled with merchant on ${formatStampDate(sub.merchant_cancelled_at, tz)}`
+              : null
+          }
+        />
       </section>
 
       <section className="mt-8">

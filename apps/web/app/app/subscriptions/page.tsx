@@ -21,6 +21,8 @@ const STATUS_LABEL = {
 
 const btn =
   "inline-flex h-11 items-center rounded-md bg-primary px-4 font-medium text-primary-foreground hover:opacity-90";
+const secondary =
+  "inline-flex h-11 items-center rounded-md border border-input px-4 font-medium text-foreground hover:bg-accent";
 const chip =
   "inline-flex min-h-11 items-center rounded-md border border-input px-3 text-sm aria-[current=true]:border-primary aria-[current=true]:font-semibold";
 
@@ -64,11 +66,17 @@ export default async function SubscriptionsPage({
           <Link href="/app/subscriptions/new" className={`mt-6 ${btn}`}>
             Add subscription
           </Link>
+          <Link href="/app/import" className={`mt-6 ml-3 ${secondary}`}>
+            Import from CSV
+          </Link>
         </>
       ) : (
         <>
           <Link href="/app/subscriptions/new" className={`mt-6 ${btn}`}>
             Add subscription
+          </Link>
+          <Link href="/app/import" className={`mt-6 ml-3 ${secondary}`}>
+            Import from CSV
           </Link>
           <nav aria-label="Filter and sort" className="mt-6 flex flex-col gap-3">
             <ul className="flex flex-wrap gap-2">
@@ -155,7 +163,7 @@ export default async function SubscriptionsPage({
                     </span>
                     <span className="text-sm tabular-nums text-muted-foreground">
                       Next renewal: {formatDate(r.nextRenewal)} · Stop date:{" "}
-                      {formatDate(r.stopDate)} · Days left: {daysLeftText(r.daysLeft)}
+                      {formatDate(r.stopDate)} · Days left: {daysLeftText(r.daysLeft, !!r.stopDate)}
                     </span>
                   </Link>
                   <Link

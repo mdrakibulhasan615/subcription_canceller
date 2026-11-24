@@ -9,6 +9,7 @@ export interface NotificationSub {
 }
 export interface Notification {
   id: string;
+  subscriptionId: string;
   text: string;
   fireAt: string;
   unread: boolean;
@@ -53,6 +54,7 @@ export function notificationText(
 
 interface Row {
   id: string;
+  subscription_id: string;
   type: string;
   fire_at: string;
   read_at: string | null;
@@ -68,7 +70,7 @@ export async function listNotifications(
   const { data, error } = await sb
     .from("reminders")
     .select(
-      "id, type, fire_at, read_at, subscriptions(name, stop_date, next_renewal_date, trial_end_date)",
+      "id, subscription_id, type, fire_at, read_at, subscriptions(name, stop_date, next_renewal_date, trial_end_date)",
     )
     .eq("channel", "in_app")
     .eq("status", "sent")
@@ -81,6 +83,7 @@ export async function listNotifications(
     return [
       {
         id: r.id,
+        subscriptionId: r.subscription_id,
         text: notificationText(r.type, sub, now, tz),
         fireAt: r.fire_at,
         unread: r.read_at === null,

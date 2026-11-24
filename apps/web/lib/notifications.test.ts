@@ -77,6 +77,7 @@ describe("listNotifications", () => {
       data: [
         {
           id: "a",
+          subscription_id: "sub-a",
           type: "stop_date",
           fire_at: "2026-11-23T09:00:00Z",
           read_at: null,
@@ -104,6 +105,7 @@ describe("listNotifications", () => {
       ["a", true],
       ["b", false],
     ]);
+    expect(items[0]?.subscriptionId).toBe("sub-a");
     expect(calls).toContainEqual(["order", ["fire_at", { ascending: false }]]);
     expect(calls).toContainEqual(["limit", [50]]);
     expect(calls).toContainEqual(["eq", ["channel", "in_app"]]);

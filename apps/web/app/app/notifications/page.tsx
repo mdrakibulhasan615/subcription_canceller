@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CircleAlert, Bell } from "lucide-react";
 import { createClient, getClaims } from "../../../lib/supabase/server";
 import { createSubDb, userIdFrom } from "../../../lib/subscriptions";
@@ -69,6 +70,12 @@ export default async function NotificationsPage() {
                     {n.fireAt.slice(0, 10)}
                   </time>
                 </p>
+                <Link
+                  href={`/app/subscriptions/${n.subscriptionId}`}
+                  className="inline-flex min-h-11 items-center self-start underline underline-offset-2"
+                >
+                  View subscription
+                </Link>
                 {n.unread && (
                   <form action={markOneRead}>
                     <input type="hidden" name="id" value={n.id} />

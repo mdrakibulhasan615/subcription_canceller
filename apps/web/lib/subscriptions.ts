@@ -73,6 +73,13 @@ export interface SubDb extends DbLike {
   updateSub(userId: string, id: string, row: SubWrite): Promise<boolean>;
   setArchived(userId: string, id: string, at: string | null): Promise<boolean>;
   deleteSub(userId: string, id: string): Promise<boolean>;
+  /** Narrow write for T-012. Touches only the columns in the patch. */
+  patchSub(userId: string, id: string, patch: SubPatch): Promise<boolean>;
+}
+export interface SubPatch {
+  stop_confirmed_at?: string | null;
+  merchant_cancelled_at?: string | null;
+  stop_date?: string;
 }
 
 type ErrorCode = "server" | "not_found" | "rebuild_failed";
@@ -259,7 +266,7 @@ export async function saveSubscription(
   return r.ok ? { ok: true, id: savedId } : { ...r, id: savedId };
 }
 
-async function change(
+export async function change(
   db: SubDb,
   userId: string,
   now: Date,
@@ -347,6 +354,15 @@ export function createSubDb(sb: SupabaseClient): SubDb {
       const { data, error } = await sb
         .from("subscriptions")
         .update({ archived_at: at })
+        .match(mine(userId, id))
+        .select("id");
+      if (error) throw error;
+      return !!data?.length;
+    },
+    async patchSub(userId, id, patch) {
+      const { data, error } = await sb
+        .from("subscriptions")
+        .update(patch)
         .match(mine(userId, id))
         .select("id");
       if (error) throw error;

@@ -1,6 +1,7 @@
 import { BRAND } from "@app/core";
 import { Info } from "lucide-react";
 import Link from "next/link";
+import { LegalLinks } from "../components/legal-links";
 import { WaitlistForm } from "./waitlist-form";
 
 const STEPS = [
@@ -72,6 +73,8 @@ export default function Page() {
         <Link href="/guides" className="inline-flex min-h-11 items-center underline">
           Cancel guides
         </Link>
+        {" · "}
+        <LegalLinks />
       </footer>
     </>
   );

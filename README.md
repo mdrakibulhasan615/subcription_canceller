@@ -22,3 +22,9 @@ Good to know:
 
 - A magic link must open in the same browser that asked for it (PKCE).
 - The same verified email links the Google identity and the magic-link identity to one user.
+
+## Go-live: legal contact and Sentry (T-022)
+
+- Set `NEXT_PUBLIC_CONTACT_EMAIL` (Vercel, Production) to a real inbox. The default is `contact@example.com`.
+- Optional: set `NEXT_PUBLIC_SENTRY_DSN` (Vercel) to turn on error reports. If unset, Sentry stays off. We use no tunnel, so ad blockers may drop some browser events. This is accepted.
+- Legal pages carry a "template" banner. Remove it only after a lawyer reviews `apps/web/lib/legal.ts`.
