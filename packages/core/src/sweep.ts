@@ -136,7 +136,11 @@ export async function runSweep(deps: {
         });
       }
     } catch (e) {
-      findings.push({ code: "bad_profile", severity: "warn", detail: `Sub ${s.id}: ${msg(e)}` });
+      findings.push({
+        code: "bad_profile",
+        severity: "critical",
+        detail: `Sub ${s.id}: ${msg(e)}`,
+      });
       continue;
     }
 
@@ -146,7 +150,11 @@ export async function runSweep(deps: {
       await db.apply(writes);
       repaired += n;
     } catch (e) {
-      findings.push({ code: "apply_failed", severity: "warn", detail: `Sub ${s.id}: ${msg(e)}` });
+      findings.push({
+        code: "apply_failed",
+        severity: "critical",
+        detail: `Sub ${s.id}: ${msg(e)}`,
+      });
     }
   }
 

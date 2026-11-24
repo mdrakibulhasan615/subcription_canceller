@@ -1,7 +1,7 @@
 ﻿---
 id: T-004
 title: Profile and settings
-status: PLANNING
+status: TESTING
 milestone: MVP
 ui: true
 depends_on: [T-003]
@@ -39,6 +39,7 @@ Reviewer: yes (DB migration + permission-sensitive writes).
 
 ## Design (Designer)
 ## Build notes (Builder)
+Built. 132 tests, build ok (/app/settings dynamic). Migration 000005 (reminder_hour, reminder_days shape check incl. no null items, timezone length) + pgTAP. Deviations: DbLike uses insertReminder (one row at a time, returns pg error code, 23505=success) and setReminderStatus(ids,to) (filters on expected old status); SettingsForm takes action/initialState props; two inline eslint-disable in settings-form.tsx (browser tz effect). Unverified: SQL (CI), live Supabase, browser, axe, dark mode. Gaps: tz validity only in server action; no transaction; row-by-row insert (shortcut comment).
 ## Test report (Tester)
 ## Review verdict (Reviewer)
 <!-- VERDICT: PASS | NEEDS_FIXES -->

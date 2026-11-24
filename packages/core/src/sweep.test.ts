@@ -148,6 +148,7 @@ describe("runSweep", () => {
     ]);
     const r = await runSweep({ db, alerter, now });
     expect(r.findings.find((f) => f.code === "bad_profile")?.detail).toContain("bad");
+    expect(r.findings.find((f) => f.code === "bad_profile")?.severity).toBe("critical");
     expect(db.apply).toHaveBeenCalledTimes(1);
     expect(db.apply.mock.calls[0]![0].insert[0]!.subscription_id).toBe("good");
   });
@@ -161,6 +162,7 @@ describe("runSweep", () => {
     const r = await runSweep({ db, alerter, now });
     expect(db.apply).toHaveBeenCalledTimes(2);
     expect(codes(r)).toContain("apply_failed");
+    expect(r.findings.find((f) => f.code === "apply_failed")?.severity).toBe("critical");
     expect(r.repaired).toBe(6);
   });
 
