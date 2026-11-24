@@ -74,7 +74,7 @@ T-021 | Events + metrics SQL + card question (ui) | DONE | - | CI verified; chec
 T-022 | Sentry + legal pages (ui) | DONE | - | placeholder contact email; T-021 updates analytics line
 T-023 | Export + account delete (ui) | DONE | - | manual: amr claim, live delete; SERVICE_ROLE_KEY on Vercel
 T-024 | Web push | POST_MVP | - | decided 2026-11-25; spec in the ticket
-T-025 | T-025a DONE (time tests, public axe, manual QA); T-025b e2e smoke CI | T-025b BUILDING | builder | extended e2e POST_MVP
+T-025 | Time tests, public axe, manual QA, CI e2e smoke | DONE | - | e2e smoke green on first CI run (36 tests)
 
 ## Open Questions / Risks
 - Standing order (developer, 2026-11-24): run T-001 to T-025 without check-ins. CEO approves. Reviewer only when needed (security, DB, scheduler, risky). Ask developer only if blocked.
