@@ -1,7 +1,7 @@
 ﻿---
 id: T-010
 title: Daily safety sweep
-status: PLANNING
+status: BUILDING
 milestone: MVP
 ui: false
 depends_on: [T-009]

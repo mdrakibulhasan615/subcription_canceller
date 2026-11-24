@@ -49,15 +49,15 @@ Mode A only (user-managed card). Epics E1 to E7 from the plan, with these change
 <!-- T-001 | title | STATUS | owner-agent | one-line note -->
 Roadmap approved 2026-11-24. Ticket files T-001 to T-025 exist in `tickets/`. T-002 to T-025 are BACKLOG stubs. The Planner writes their criteria when each starts.
 T-001 | Monorepo, CI, lint, test setup | DONE | - | CI unproven, no remote
-T-002 | Supabase schema, RLS, RLS tests | DONE (unverified) | - | SQL not run; first green db CI = proof
-T-003 | Auth (ui) | BUILDING | designer-skipped,builder | Reviewer required; dev must set up Google OAuth + SMTP
+T-002 | Supabase schema, RLS, RLS tests | DONE | - | pgTAP verified in CI (118 tests)
+T-003 | Auth (ui) | DONE | - | live auth untested; needs Supabase project + Google + SMTP
 T-004 | Profile and settings (ui) | BACKLOG | - | dep T-003
 T-005 | Core: money, dates, cost | DONE | - | 42 tests; zod 4.6.7
 T-006 | Subscription CRUD (ui) | BACKLOG | - | dep T-002,004,005
 T-007 | List, detail, checklist (ui) | BACKLOG | - | dep T-006
 T-008 | Reminder generation (core) | DONE | - | 62 core tests
-T-009 | Reminder sender + pg_cron | DONE (unverified) | - | do not enable prod cron before T-011
-T-010 | Safety sweep | BACKLOG | - | dep T-009; add: tighten reminders client grants, detect missing Vault secrets
+T-009 | Reminder sender + pg_cron | DONE | - | pgTAP verified in CI; do not enable prod cron before T-011
+T-010 | Safety sweep | BUILDING | builder | dep T-009; add: tighten reminders client grants, detect missing Vault secrets
 T-011 | Email + in-app notices (ui) | BACKLOG | - | dep T-009; add: reopen rows failed "email not configured", cap client-inserted reminder rows
 T-012 | Reminder actions (ui) | BACKLOG | - | dep T-007,011
 T-013 | Stop-date flow + trial mode (ui) | BACKLOG | - | dep T-012
@@ -76,6 +76,7 @@ T-025 | E2E, axe, time tests | BACKLOG | - | dep all MVP
 
 ## Open Questions / Risks
 - Standing order (developer, 2026-11-24): run T-001 to T-025 without check-ins. CEO approves. Reviewer only when needed (security, DB, scheduler, risky). Ask developer only if blocked.
+- CI is live on GitHub (main): workflows CI and DB both green on first push (2026-11-24). Edge Function index.ts (Deno) is still untested.
 - Dev actions later: Supabase project + Google OAuth client + custom SMTP (see README, T-003).  create a GitHub remote so CI can run.
 
 ## Deferred Recommendations

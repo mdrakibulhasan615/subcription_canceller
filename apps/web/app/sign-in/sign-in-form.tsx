@@ -176,15 +176,17 @@ export function SignInForm({ next, callbackError }: { next: string; callbackErro
                   aria-describedby={fieldError ? "signin-error" : undefined}
                   className="mt-1"
                 />
-                {fieldError && (
-                  <p
-                    id="signin-error"
-                    className="mt-2 flex items-start gap-2 text-sm text-destructive"
-                  >
-                    <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                    {MESSAGES[state as keyof typeof MESSAGES]}
-                  </p>
-                )}
+                <div aria-live="polite" data-testid="signin-error-region">
+                  {fieldError && (
+                    <p
+                      id="signin-error"
+                      className="mt-2 flex items-start gap-2 text-sm text-destructive"
+                    >
+                      <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                      {MESSAGES[state as keyof typeof MESSAGES]}
+                    </p>
+                  )}
+                </div>
                 <Button type="submit" disabled={sending} className="mt-4 w-full">
                   {sending ? (
                     <>

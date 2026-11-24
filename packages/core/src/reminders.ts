@@ -125,6 +125,7 @@ export interface ReminderWrites {
     fire_at: string;
   }[];
   skipIds: string[];
+  /** Contract: a client reopen only sets status to pending. It cannot reset attempts or claimed_until. */
   reopenIds: string[];
 }
 

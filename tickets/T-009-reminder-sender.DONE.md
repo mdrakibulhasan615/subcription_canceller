@@ -10,7 +10,7 @@ fix_loops: 0
 ---
 
 # T-009 send_due_reminders Edge Function, pg_cron, retries, failed-alert email
-✅ DONE 2026-11-24 (UNVERIFIED: SQL/Deno never executed)
+✅ DONE 2026-11-24 (VERIFIED 2026-11-24: GitHub db workflow green, pgTAP 5 files / 118 tests PASS on supabase CLI 3.3.0)
 
 ## Goal
 send_due_reminders Edge Function, pg_cron, retries, failed-alert email. Planner refines this and writes Given/When/Then criteria before build.

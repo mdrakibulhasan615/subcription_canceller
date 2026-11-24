@@ -76,10 +76,10 @@ select is(public.mark_reminder_result('00000000-0000-0000-0000-000000000007', 's
 -- Criteria 6: privileges and invalid outcome.
 select ok(not has_function_privilege('anon', 'public.claim_due_reminders(int)', 'execute'), 'anon cannot claim');
 select ok(not has_function_privilege('authenticated', 'public.claim_due_reminders(int)', 'execute'), 'authenticated cannot claim');
-select ok(not has_function_privilege('anon', 'public.mark_reminder_result(uuid,text,text)', 'execute'), 'anon cannot mark');
-select ok(not has_function_privilege('authenticated', 'public.mark_reminder_result(uuid,text,text)', 'execute'), 'authenticated cannot mark');
+select ok(not has_function_privilege('anon', 'public.mark_reminder_result(uuid,text,text,text)', 'execute'), 'anon cannot mark');
+select ok(not has_function_privilege('authenticated', 'public.mark_reminder_result(uuid,text,text,text)', 'execute'), 'authenticated cannot mark');
 select ok(has_function_privilege('service_role', 'public.claim_due_reminders(int)', 'execute'), 'service_role can claim');
-select ok(has_function_privilege('service_role', 'public.mark_reminder_result(uuid,text,text)', 'execute'), 'service_role can mark');
+select ok(has_function_privilege('service_role', 'public.mark_reminder_result(uuid,text,text,text)', 'execute'), 'service_role can mark');
 select throws_ok(
   $q$select public.mark_reminder_result('00000000-0000-0000-0000-000000000002', 'bogus')$q$,
   'invalid outcome: bogus');

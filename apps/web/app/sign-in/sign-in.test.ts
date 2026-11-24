@@ -30,6 +30,10 @@ describe("sign-in form", () => {
     expect(html).toMatch(/<label[^>]*for="signin-email"/);
     expect(html).toMatch(/<input[^>]*id="signin-email"[^>]*aria-invalid="false"/);
     expect(html).toContain('role="status"');
+    expect(html).toContain('data-testid="signin-error-region"'); // persistent live region for async errors
+    expect(html).toMatch(
+      /aria-live="polite"[^>]*data-testid="signin-error-region"|data-testid="signin-error-region"[^>]*aria-live="polite"/,
+    );
     expect(html).toContain("Sign in to ");
     expect(html).toContain("Send sign-in link");
     expect(html).toContain("Continue with Google");

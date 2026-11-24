@@ -10,7 +10,7 @@ fix_loops: 0
 ---
 
 # T-002 Supabase schema, migrations, RLS, RLS tests
-✅ DONE 2026-11-24 (UNVERIFIED: SQL never executed; proof = first green db CI run)
+✅ DONE 2026-11-24 (VERIFIED 2026-11-24: GitHub db workflow green, pgTAP 5 files / 118 tests PASS on supabase CLI 3.3.0)
 
 ## Goal
 Supabase schema, migrations, RLS, RLS tests. Planner refines this and writes Given/When/Then criteria before build.
